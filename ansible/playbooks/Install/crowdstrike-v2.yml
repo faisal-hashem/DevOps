@@ -1,0 +1,37 @@
+---
+- hosts: all
+  become: true
+  vars_files: ~/ansible/vaults/pat-token-vault.yml
+  tasks:
+    - name: Add AZDO APT repository for Crowdstrike
+      apt_repository:
+        repo: "deb [arch=amd64] https://GA-Infra.pkgs.visualstudio.com/_packaging/ga-ansible-packages/ubuntu/22.04 ./"
+        state: present
+        update_cache: true
+        username: username
+        password: {{ apt_pat_token }}
+
+    - name: Register AZDO APT repository's key
+      apt_key:
+        url: https://GA-Infra.pkgs.visualstudio.com/_packaging/ga-ansible-packages/debian/dists/jammy/Release.gpg
+        state: present
+
+    - name: Add AZDO APT repository for Crowdstrike
+      apt_repository:
+        repo: "deb [arch=amd64] https://GA-Infra.pkgs.visualstudio.com/_packaging/ga-ansible-packages/ubuntu/22.04 ./"
+        state: present
+        update_cache: true
+
+    - name: Install Crowdstrike Agent
+      apt:
+        name: crowdstrike
+        state: present
+
+    - name: Set up CID for Crowdstrike
+      command:
+        cmd: "/opt/CrowdStrike/falconctl -s --cid=78C766B647DF4647B2EFA7B1800364D0-42 -f"
+
+    - name: Ensure falcon-sensor systemctl service is started
+      systemd:
+        name: falcon-sensor 
+        state: started

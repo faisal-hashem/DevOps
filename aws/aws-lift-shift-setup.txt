@@ -1,0 +1,114 @@
+AWS Setup: 
+
+Security Groups (Division & Firewalls)
+    - Databases: Will need to allow traffic to go from App Server SG to the MySQL(3306), RabbitMQ(5672), Memcache(11211) , SSH from myIP, traffic between each DB resource (Memcache, RabbitMQ, mySQL)
+    - App Server: Will need to allow traffic from the Load Balancer SG on Port 8080, SSH(22) and Web Browser(8080) from myIP
+    - Load Balancers: Will need to allow traffic from HTTP(8080) and HTTPS(443)
+
+Create Key Pair for SSH connectivity to each EC2 Instance
+
+Create EC2 Instances:
+    - Use CentOS9 for RabbitMQ, Memcache and MySQL
+    - Use Ubuntu for Tomcat App Server
+    - Use t2.micro Free Tier for each VM
+    - Enter dedicated BASH script for each server User Data deployment
+    - Store RabbitMQ, Memcache, MySQL in Backend Security Group
+    - Store Tomcat App Server in App Security Group
+    - Enter KeyPair for each
+
+SSH into each VM using the public IP and keypair.pem file:
+    - Give permissions to the .pem file - chmod 400 keypair.pem
+    - mysql: ssh -i /Users/fhashem/Downloads/vprofile-prod-key.pem ec2-user@3.144.45.165
+    - RabbitMQ: ssh -i /Users/fhashem/Downloads/vprofile-prod-key.pem ec2-user@13.58.173.240
+    - Memcache: ssh -i /Users/fhashem/Downloads/vprofile-prod-key.pem ec2-user@18.119.119.56
+    - Tomcat: ssh -i /Users/fhashem/Downloads/vprofile-prod-key.pem ubuntu@18.226.226.176
+    - Validate MariaDB, RabbitMQ, Memcached and tomcat9 is running on each server
+    - Run curl http://169.254.169.254/latest/user-data on each VM to check if the script ran successfully
+    - Validate SQL from sql server: 
+        mysql -u admin -padmin123 accounts 
+        show tables
+    -Validate Memcached: 
+        sudo -i
+        ss -tunlp | grep "11211"
+
+Create Route53 DNS Zone and Entry
+    - vprofile.in zone name, that is private. 
+    - Associate DNS Zone with VPC (eastus2), will only be able to resolve in that region
+    - Simple Routing
+    - Add A record for db01: Private IP for DB EC2, mc01.. rmq01 .. 
+
+Modify application.properties file to include the dns name of the DB servers
+    - Go to vprofile-project/src/main/resouces/application.properties
+    - Update URL/Host to include db01.vprofile.in, mc01.vprofile.in, rmq01.vprofile.in 
+
+Create Artifacts (.war file)
+    - Browse to vprofile-project and run: mvn install
+    - This will create the app.war file 
+    - You can go to /target/vprofile-v2/WEB-INF/classes/application.properties to validate you see the db with the domain name on it
+
+Create S3 bucket, grant App Server access to S3, access aws cli/s3 from my PC using a user account with s3 Administrator
+    - Create s3 IAM user account that has s3 Administrator Access. 
+    - Create access keys for the s3 admin account for CLI access
+    - Run aws configure and add the Access Key ID and Secret
+    - Create bucket: aws s3 mb s3://vprofile-s3-test-23
+    - Copy .war file to s3 bucket: aws s3 cp target/vprofile-v2.war s3://vprofile-s3-test-23/vprofile-v2.war
+
+Add IAM role     
+    - Go to IAM, Create Role with s3 Admin Access. Give Service/EC2 with s3 Admin Access.
+    - Assign Tomcat App Server access to the IAM role. Right click and click on Modify IAM Role. 
+    - SSH into the Tomcat Server and run apt install awscli
+    - Stop tomcat Service - systemctl stop tomcat9
+    - Remove existing tomcat ROOT: rm -r /var/lib/tomcat9/webapps/ROOT
+    - Copy new .war file over to webapps: cp /tmp/vprofile-v2.war /var/lib/tomcat9/webapps/ROOT.war
+    - Start tomcat service: systemctl start tomcat9
+    - Validate db sources in the webapp: cat /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/application.properties 
+
+Create GoDaddy Test Domain: $22 per year
+    - mandohashdevops.com
+    - Go to ACM (AWS Certificate Manager)
+        Request a new certificate
+        Add Domain name as *.mandohashdevops.com
+        Grab CNAME name without the domain: _f38a79349a74e9d9b0d0f578208caeb2 (remove .mandohashdevops.com.)
+        Grab CNAME value without the period:  _34a45350b62c7c1bb0ed187b29e50ad7.yygwskclfy.acm-validations.aws
+        Make sure the certificate is issued
+
+
+Set up Load Balancer
+    - Create Target Group: 
+        Use Instances
+        Port 8080
+        Healthcheck /login
+        Override port 8080
+        Healthy threshold to 3
+        Add Target as Tomcat App Server
+
+    - Create Load Balancer: 
+        Select Application Load Balancer
+        Internet Facing
+        Map to all VPCs in region
+        Add ELB Security Group, which allows HTTP and HTTPS traffic
+        Add HTTP 80 and HTTPS 443 Listeners that point to the Target Group for Tomcat App Server
+        Add Secure Listener and point Default SSL/TLS to the ACM certificate you created earlier
+        After the LB is created, grab the DNS name of the LB and add it as a CNAME to GoDaddy:
+            vprofileapp = vprofile-prod-elb-1941520377.us-east-2.elb.amazonaws.com
+        AWS Load Balancer will become Active after this
+        Now you can access the tomcat app from the web browser: https://vprofileapp.mandohashdevops.com/
+
+Auto Scaling Group:
+
+    - Create AMI Image from the EC2 AMI Image
+    - Create AWS Launch Template and add the AMI, t2.micro, App Security Group, Key Pair, 
+    - Create Auto Scaling Group, attach the Launch Template to it
+        Add current VPC and all subnets for Availability Zones
+        Attach to existing Load Balancers Target Group
+        Turn on ELB Healthcheck
+        For now place the limit/capacity to Desired:1, Max:4, Min:1
+        Use Target scaling policy to 50% for auto scaling
+    - The ASG will create a VM for you, therefore you should terminate the old VM since that was only used to create the image. 
+
+You can validate everything is working by accessing https://vprofileapp.mandohashdevops.com/ on the web browser. 
+
+
+
+
+

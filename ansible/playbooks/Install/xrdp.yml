@@ -1,0 +1,25 @@
+---
+- name: Install XRDP
+  hosts: "ubuntu"
+  become: yes
+
+  tasks:
+    - name: Install Xfce desktop environment
+      apt:
+        name: xfce4
+        state: present
+
+    - name: Install XRDP package
+      apt:
+        name: xrdp 
+        state: present
+
+    - name: Enable XRDP service
+      systemd:
+        name: xrdp
+        enabled: yes
+        state: started
+
+    - name: Update package cache
+      apt:
+        update_cache: yes

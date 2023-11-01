@@ -1,0 +1,6 @@
+Jenkins File:
+
+Multi-Stage Pipeline: Deploy to all environments in the same Jenkins File. Will be able to deploy to dev, staging, and production all from the same pipeline.
+
+Single stage Pipeline: Deploy to dev, staging and production from separate jenkins file. 
+

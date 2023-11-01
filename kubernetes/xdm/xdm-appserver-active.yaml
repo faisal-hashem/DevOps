@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: -appserver-active
+  labels:
+    app: -appserver-active
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: -appserver-active
+  template:
+    metadata:
+      labels:
+        app: -appserver-active
+    spec:
+      containers:
+        - image: /xdm:5.3.19
+          name: -appserver-active
+          resources:
+            requests:
+              memory: "4Gi"
+            limits:
+              memory: "5Gi"
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: -config
+          volumeMounts:
+            - name: secrets-store01-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          env:
+            - name: _SETUP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: setup-token
+                  key: -setup-token
+            - name: XDM_REPOSITORY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: repo-password
+                  key: xdm-repo-password
+            - name: XDM_REPOSITORY_READONLY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: repo-ro-password
+                  key: xdm-repo-ro-password
+      restartPolicy: Always
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "-azure-secret-provider"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: -appserver-active
+  labels:
+    app: -appserver-active
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: -appserver-active

@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Check if sysmonforlinux is installed
+      apt:
+        list: sysmonforlinux
+      register: sysmon_pkg 
+  
+    - name: Download Microsoft packages product repository configuration
+      get_url:
+        url: "https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb"
+        dest: "/tmp/packages-microsoft-prod.deb"
+      when: "'sysmonforlinux' not in sysmon_pkg.packages"
+
+    - name: Install the Microsoft packages product repository configuration
+      apt:
+        deb: "/tmp/packages-microsoft-prod.deb"
+      when: "'sysmonforlinux' not in sysmon_pkg.packages"  
+        
+    - name: Update the apt cache
+      apt:
+        update_cache: yes
+      when: "'sysmonforlinux' not in sysmon_pkg.packages"
+    
+    - name: Install sysmonforlinux
+      apt:
+        name: sysmonforlinux
+        state: latest
+      when: "'sysmonforlinux' not in sysmon_pkg.packages"

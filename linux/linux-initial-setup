@@ -1,0 +1,5 @@
+#Run Updates
+
+sudo apt -y update
+sudo apt -y upgrade
+sudo apt-get install net-tools rpm alien 

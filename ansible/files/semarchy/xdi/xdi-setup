@@ -1,0 +1,71 @@
+Architecture:
+
+Dev: XDI Desginer Server (GIT/IDE)
+
+QA: XDI Runtime & XDI Analytics - Runtime runs integration flows. Connects to source and target systems to extract,
+load, and transform
+data.
+
+UAT: XDI Runtime & XDI Analytics
+
+Prod: XDI Runtime & XDI Analytics - use analytics to monitor all Runtime instances, able to schedule, deploy and
+configure the integration flows
+
+
+XDI Runtime Setup:
+1. Copy over runtime.zip file and extract to /opt/semarchy_xdi_runtime (ansible - copy job)
+sudo tar -xzvf name_of_the_downloaded_archive.tar.gz -C /opt/semarchy_xdi_runtime
+
+2. Set Necessary Permissions (ansible - permissions)
+sudo chmod +x /opt/semarchy_xdi_runtime/*.sh
+sudo chmod -R +w /opt/semarchy_xdi_runtime/temp
+sudo chmod -R +w /opt/semarchy_xdi_runtime/build
+sudo chmod -R +w /opt/semarchy_xdi_runtime/sessions
+
+3. Create XDI user and run start engine script (ansible - user creation and run script)
+sudo useradd -r semarchy_xdi_user
+sudo chown -R semarchy_xdi_user: /opt/semarchy_xdi_runtime/
+sudo su - semarchy_xdi_user
+cd /opt/semarchy_xdi_runtime/
+./startengine.sh - - Place it as a startup script for startengine.sh
+
+Default ports:
+42100
+42101
+42200
+
+#check if port is being used
+lsof -ti :$PORT
+
+#kill port
+kill $(lsof -ti :$PORT)
+kill -9 $(lsof -ti :$PORT)
+sudo kill -9 $(lsof -ti :$PORT)
+
+
+XDI Analytics Setup:
+1. Add new DB and run script to create DB schema for XDI database (Terraform: Add new DB and run xdi-db-schema script
+via TF)
+
+2. XDI User location setup and set environment variables (ansible - create directory and add env variable to setenv.sh)
+
+cd /usr
+mkdir analytics
+export XDI_ANALYTICS_WEBAPP_HOME=/usr/analytics/
+
+3. Modify /opt/tomcat/context.xml (ansible, copy modified context.xml from files directory to Linux box)
+
+<Context>
+  ...
+  <Resource name="jdbc/xdi-analytics-datasource-tomcat" auth="Container" type="javax.sql.DataSource"
+    driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    url="jdbc:sqlserver://sql-semarchy-vm-dev-uc1.database.windows.net:1433;databaseName=xdi_analytics_repository"
+    username="xdi_db_administrator@sql-semarchy-vm-dev-uc1" password="CheckMeOut123" maxTotal="100" maxIdle="30"
+    maxWaitMillis="10000" />
+  ...
+</Context>
+
+
+4. Modify /opt/tomcat/tomcat-users.xml (ansible, add this to existing tomcat-users.xml file)
+
+<user name="xdi_admin" password="CheckMeOut123" roles="admin-gui, manager-gui, analyticsAdmin, analyticsConnect" />

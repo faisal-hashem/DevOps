@@ -1,0 +1,36 @@
+---
+- name: Install and configure auditd
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install auditd and audispd-plugins
+      package:
+        name:
+          - auditd
+          - audispd-plugins
+        state: present
+
+    - name: Start and enable auditd service
+      service:
+        name: auditd
+        state: started
+        enabled: yes
+
+    - name: Add rules to audit.rules
+      blockinfile:
+        path: /etc/audit/rules.d/audit.rules
+        block: |
+          #Monitor user account changes
+          -w /etc/passwd -p wa -k passwd_changes
+          #Log all executions
+          -a always,exit -F arch=b64 -S execve -k exec_logging
+          #Changes to /etc
+          -w /etc/ -p wa -k etc_changes
+          #Changes to /opt/tomcat directory
+          -w /opt/tomcat -p wa -k tomcat_changes
+        create: yes
+
+    - name: Restart auditd to apply changes
+      service:
+        name: auditd
+        state: restarted

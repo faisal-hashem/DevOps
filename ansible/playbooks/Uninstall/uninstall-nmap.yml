@@ -1,0 +1,7 @@
+- hosts: "*"
+  become: true
+  tasks:
+    - name: Perform Uninstall of NMAP
+      apt:
+        name: nmap
+        state: absent 

@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.class | quote }}
+    nginx.ingress.kubernetes.io/affinity: {{ .Values.ingress.affinity | quote }}
+    nginx.ingress.kubernetes.io/session-cookie-name: {{ .Values.ingress.sessionCookieName | quote }}
+    nginx.ingress.kubernetes.io/session-cookie-expires: {{ .Values.ingress.sessionCookieExpires | quote }}
+    nginx.ingress.kubernetes.io/session-cookie-max-age: {{ .Values.ingress.sessionCookieMaxAge | quote }}
+  name: {{ .Values.ingress.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Values.app.passive.name }}
+                port:
+                  number: {{ .Values.app.passive.containerPort }}
+            path: {{ .Values.ingress.path | quote }}
+            pathType: {{ .Values.ingress.pathType | quote }}
+    - http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Values.app.active.name }}
+                port:
+                  number: {{ .Values.app.active.containerPort }}
+            path: {{ .Values.ingress.path | quote }}
+            pathType: {{ .Values.ingress.pathType | quote }}

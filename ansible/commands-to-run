@@ -1,0 +1,4 @@
+#this is to copy rubrik agent from local linux VM (you are running ansible from) to the VMs that are listed in your Inventory/Hosts file
+#Bossaccount is used to SSH into the VMs listed in the host file
+#Host file container fhlinuxbox2 - referenced by IP for now
+ansible-playbook ./rubrik.yml --user bossaccount --ask-pass --ask-become-pass -i ~/ansible/inventory/hosts-centos 

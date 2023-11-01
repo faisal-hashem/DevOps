@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Copy Rubrik
+      copy:
+        src: ~/ansible/packages/rubrik/rubrik-agent.x86_64.deb
+        dest: /tmp/rubrik-agent.x86_64.deb
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Install Rubrik Agent
+      apt:
+        deb: /tmp/rubrik-agent.x86_64.deb
+        state: present

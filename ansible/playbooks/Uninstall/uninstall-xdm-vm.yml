@@ -1,0 +1,94 @@
+---
+- name: Revert semarchy-vm configurations
+  hosts: "ubuntu"
+  become: true
+  vars:
+    java_version: "17"
+    tomcat_version: "9.0.80"
+  
+  tasks:
+    # Stop and disable the Tomcat service
+    - name: Stop and disable Tomcat service
+      systemd:
+        name: tomcat
+        enabled: false
+        state: stopped
+      ignore_errors: true
+
+    # Revert startup.sh modifications
+    - name: Revert modification in startup.sh
+      replace:
+        path: /opt/tomcat/bin/startup.sh
+        regexp: 'exec authbind --deep "\$PRGDIR"/"\$EXECUTABLE" start "\$@"'
+        replace: 'exec "$PRGDIR"/"$EXECUTABLE" start "$@"'
+      ignore_errors: true
+
+    # Remove authbind setup
+    - name: Remove authbind file for port 80
+      file:
+        path: /etc/authbind/byport/80
+        state: absent
+      ignore_errors: true
+
+    - name: Uninstall authbind
+      apt:
+        name: authbind
+        state: absent
+      ignore_errors: true
+
+    # Revert server.xml port change
+    - name: Revert port 80 to 8080 in server.xml
+      replace:
+        path: /opt/tomcat/conf/server.xml
+        regexp: '<Connector port="80" protocol="HTTP/1.1"'
+        replace: '<Connector port="8080" protocol="HTTP/1.1"'
+      ignore_errors: true
+
+    # Delete Tomcat and related files
+    - name: Remove Tomcat directory
+      file:
+        path: /opt/tomcat
+        state: absent
+      ignore_errors: true
+
+    # Remove Tomcat user and group
+    - name: Remove tomcat user
+      user:
+        name: tomcat
+        state: absent
+      ignore_errors: true
+
+    - name: Remove tomcat group
+      group:
+        name: tomcat
+        state: absent
+      ignore_errors: true
+
+    # Remove Java packages
+    - name: Remove openjdk JDK and JRE
+      apt:
+        name:
+          - "openjdk-{{ java_version }}-jdk"
+          - "openjdk-{{ java_version }}-jre"
+        state: absent
+      ignore_errors: true
+
+    # Remove the downloaded Apache Tomcat tar.gz file
+    - name: Remove downloaded Tomcat tarball
+      file:
+        path: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        state: absent
+      ignore_errors: true
+
+    # Remove Tomcat systemd service file
+    - name: Remove Tomcat systemd service file
+      file:
+        path: /etc/systemd/system/tomcat.service
+        state: absent
+      ignore_errors: true
+
+    # Reload systemd to recognize the removal
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
+      ignore_errors: true

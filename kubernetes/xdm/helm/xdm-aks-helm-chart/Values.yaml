@@ -1,0 +1,69 @@
+namespace: xdm
+app:
+  active:
+    name: semarchy-appserver-active
+    replicas: 1
+    image: semarchy/xdm:5.3.19
+    containerPort: 8080
+    requestsMemory: "4Gi"
+    limitsMemory: "5Gi"
+    configMapRef: semarchy-config
+    mountPath: "/mnt/secrets-store"
+    readOnly: true
+    servicePort: 8080
+  passive:
+    name: semarchy-appserver-passive
+    replicas: 2
+    image: semarchy/xdm:5.3.19-passive
+    containerPort: 8080
+    requestsMemory: "4Gi"
+    limitsMemory: "5Gi"
+    configMapRef: semarchy-config
+    mountPath: "/mnt/secrets-store"
+    readOnly: true
+    servicePort: 8080
+
+ingress:
+  name: ingress
+  class: nginx
+  affinity: "cookie"
+  sessionCookieName: "sticksemarchy"
+  sessionCookieExpires: "172800"
+  sessionCookieMaxAge: "172800"
+  path: /semarchy
+  pathType: Prefix
+
+volume:
+  name: secrets-store01-inline
+  driver: secrets-store.csi.k8s.io
+  secretProviderClass: "semarchy-azure-secret-provider"
+
+secretProvider:
+  name: semarchy-azure-secret-provider
+  provider: azure
+  secretType: Opaque
+  usePodIdentity: "false"
+  useVMManagedIdentity: "true"
+  userAssignedIdentityID: "fc50fafc-5073-44e0-be93-4526d01fa0ab"
+  keyvaultName: kv-xdm-dev-uc1
+  cloudName: AzurePublicCloud
+  objectType: secret
+  objectVersion: ""
+  tenantId: eb83984f-99ea-46bb-be92-cca88ced3b85
+
+secrets:
+  setupToken:
+    name: setup-token
+    key: semarchy-setup-token
+    objectName: semarchy-setup-token
+    secretName: setup-token
+  repoPassword:
+    name: repo-password
+    key: xdm-repo-password
+    objectName: xdm-repo-password
+    secretName: repo-password
+  repoROPassword:
+    name: repo-ro-password
+    key: xdm-repo-ro-password
+    objectName: xdm-repo-ro-password
+    secretName: repo-ro-password

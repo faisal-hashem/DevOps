@@ -1,0 +1,7 @@
+- hosts: "ubuntu"
+  become: true
+  tasks:
+    - name: Perform Uninstall of Rubrik 
+      apt:
+        name: rubrik-agent
+        state: absent 

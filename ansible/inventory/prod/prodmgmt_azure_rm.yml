@@ -1,0 +1,14 @@
+plugin: azure_rm
+
+include_vm_resource_groups:
+  - '*'
+
+auth_source: msi
+
+subscription_id: 56b07343-7ecb-4de5-a101-5869d15f9619
+
+conditional_groups:
+  linux_servers: "'linux' in os_profile.system"
+
+exclude_host_filters:
+  - os_profile.system == 'windows'

@@ -1,0 +1,104 @@
+Kube Setup on VMware:
+
+Specs: 
+
+3 VMs: 1 Master and 2 Worker Nodes
+6 GB RAM
+2 CPU each
+Ubuntu 2204
+Same network, so each node has connectivity
+Swap is disabled in order for Kubelet to work properly
+
+
+Master Node: 
+sudo hostnamectl set-hostname master-node
+
+sudo apt update
+sudo apt upgrade
+
+sudo swapoff –a
+
+sudo ufw allow 6443
+sudo ufw allow 6443/tcp
+sudo ufw allow 6443/udp
+
+#docker - not sure if this working
+sudo apt install docker.io
+
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl start docker 
+
+#k8 install
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.1.169:6443 --token wocipm.ryims008pooami7m \
+        --discovery-token-ca-cert-hash sha256:3fce309dac233710d5f3f6e3b33707412882270155e96e59da1e4fd64578bde7
+
+
+
+
+
+
+Worker Node 1 & 2: 
+
+sudo apt update
+sudo apt upgrade
+
+#docker
+sudo apt install docker.io
+sudo systemctl enable docker
+sudo systemctl start docker 
+
+#k8 install
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+
+sudo apt-add-repository "deb http://apt.kubernetes.io/kubernetes-xenial main"
+
+sudo apt-get install kubeadm kubelet kubectl
+sudo apt-mark hold kubeadm kubelet kubectl
+sudo swapoff –a
+sudo hostnamectl set-hostname w1
+
+#Retrieve token/cert from kubedm init step in master node
+kubeadm join --discovery-token abcdef.1234567890abcdef --discovery token-ca-cert-hash sha256:1234..cdef 1.2.3.4:6443
+

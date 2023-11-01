@@ -1,0 +1,83 @@
+Requirements: 
+- EC2 instance (Ubuntu) with .pem key pair
+
+#!/bin/bash
+sudo apt update
+sudo apt install openjdk-11-jdk -y 
+sudo apt install maven -y
+
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins -y
+
+#Edit this to add Jenkins port to 8090 
+/lib/systemd/system/jenkins.service
+modify Environment="JENKINS_PORT=" to 8090
+
+
+YOURPORT=8080
+PERM="--permanent"
+SERV="$PERM --service=jenkins"
+
+firewall-cmd $PERM --new-service=jenkins
+firewall-cmd $SERV --set-short="Jenkins ports"
+firewall-cmd $SERV --set-description="Jenkins port exceptions"
+firewall-cmd $SERV --add-port=$YOURPORT/tcp
+firewall-cmd $PERM --add-service=jenkins
+firewall-cmd --zone=public --add-service=http --permanent
+firewall-cmd --reload
+
+#Docker Setup in MacOS
+docker network create jenkins
+
+docker run \
+  --name jenkins-docker \
+  --rm \
+  --detach \
+  --privileged \
+  --network jenkins \
+  --network-alias docker \
+  --env DOCKER_TLS_CERTDIR=/certs \
+  --volume jenkins-docker-certs:/certs/client \
+  --volume jenkins-data:/var/jenkins_home \
+  --publish 2376:2376 \
+  docker:dind \
+  --storage-driver overlay2
+
+  #create Docker file: 
+FROM jenkins/jenkins:2.414.3-jdk17
+USER root
+RUN apt-get update && apt-get install -y lsb-release
+RUN curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
+  https://download.docker.com/linux/debian/gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
+  https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+RUN apt-get update && apt-get install -y docker-ce-cli
+USER jenkins
+RUN jenkins-plugin-cli --plugins "blueocean docker-workflow"
+
+#Create docker image:
+docker build -t myjenkins-blueocean:2.414.3-1 .
+
+#Create docker container with this image:
+docker run \
+  --name jenkins-blueocean \
+  --restart=on-failure \
+  --detach \
+  --network jenkins \
+  --env DOCKER_HOST=tcp://docker:2376 \
+  --env DOCKER_CERT_PATH=/certs/client \
+  --env DOCKER_TLS_VERIFY=1 \
+  --publish 8080:8080 \
+  --publish 50000:50000 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  myjenkins-blueocean:2.414.3-1
+
+
+  
+
+  

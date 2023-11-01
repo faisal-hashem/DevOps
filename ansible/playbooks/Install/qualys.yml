@@ -1,0 +1,19 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Copy Qualys
+      copy:
+        src: ~/ansible/packages/qualys/QualysCloudAgent.deb
+        dest: /tmp/QualysCloudAgent.deb
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Qualys Agent
+      apt:
+        deb: /tmp/QualysCloudAgent.deb
+        state: present
+        
+    - name: Run Qualys Cloud Agent activation script
+      command:
+        cmd: "/usr/local/qualys/cloud-agent/bin/qualys-cloud-agent.sh ActivationId=a8632ea1-ee7b-40f4-9df2-35d2a6286e92 CustomerId=49464b7c-0cc4-4bdb-83a2-1fdb95555d8e"

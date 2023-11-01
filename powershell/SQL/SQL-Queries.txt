@@ -1,0 +1,18 @@
+Enable CDC
+
+SELECT name FROM sys.databases WHERE is_cdc_enabled=0
+
+EXEC sys.sp_cdc_enable_db 
+GO
+
+SELECT name FROM sys.databases WHERE is_cdc_enabled=0
+
+
+Disable CDC
+
+SELECT name FROM sys.databases WHERE is_cdc_enabled=1
+
+EXEC sys.sp_cdc_disable_db  
+GO
+
+SELECT name FROM sys.databases WHERE is_cdc_enabled=1

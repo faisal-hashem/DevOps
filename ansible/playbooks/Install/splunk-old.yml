@@ -1,0 +1,49 @@
+- hosts: "ubuntu"
+  become: true
+
+  vars_prompt:
+    - name: splunk_username
+      prompt: "Enter the user name for the Universal Forwarder"
+      private: no
+    - name: CheckMeOut123
+      prompt: "Enter the password for the Universal Forwarder"
+      private: yes
+
+  tasks:
+    - name: Copy Splunk
+      copy:
+        src: ~/ansible/packages/splunk
+        dest: /tmp/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Splunk Agent
+      apt:
+        deb: /tmp/splunkforwarder-9.1.1-amd64.deb
+        state: present
+
+    - name: Allow port 9997 through UFW
+      ufw:
+        rule: allow
+        port: '9997'
+        proto: tcp
+
+    - name: Install the Splunk app
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk install app /tmp/splunkclouduf.spl
+        creates: /opt/splunkforwarder 
+      register: install_app_output
+      become: yes 
+      
+    - name: Check if app installation was successful
+      assert:
+        that:
+          - "'App /tmp/splunkclouduf.spl installed' in install_app_output.stdout"
+        fail_msg: "Splunk app installation failed!"
+        success_msg: "Splunk app installed successfully!"
+
+    - name: Restart the Splunk forwarder
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk restart
+        become: yes

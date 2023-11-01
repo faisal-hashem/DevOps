@@ -1,0 +1,72 @@
+- hosts: all
+  become: true
+  vars_files: ~/ansible/vaults/splunk-vault.yml
+  vars:
+    splunkadmin: "SplunkAdmin"
+
+  tasks:
+    - name: Validate Splunk is Installed
+      stat:
+        path: /opt/splunkforwarder
+      register: splunk_is_installed
+  
+    - name: Copy Splunk
+      copy:
+        src: ~/ansible/packages/splunk/splunkforwarder-9.1.1-amd64.deb
+        dest: /tmp/splunkforwarder-9.1.1-amd64.deb
+        owner: root
+        group: root
+        mode: '0644'
+      when: not splunk_is_installed.stat.exists
+
+    - name: Copy Splunk Certificate
+      copy:
+        src: ~/ansible/packages/splunk/splunkclouduf.spl
+        dest: /tmp/splunkclouduf.spl
+        owner: root
+        group: root
+        mode: '0644'
+      when: not splunk_is_installed.stat.exists      
+
+    - name: Install Splunk Agent
+      apt:
+        deb: /tmp/splunkforwarder-9.1.1-amd64.deb
+        state: present
+      when: not splunk_is_installed.stat.exists  
+
+    - name: Allow port 9997 through UFW
+      ufw:
+        rule: allow
+        port: '9997'
+        proto: tcp
+      when: not splunk_is_installed.stat.exists    
+
+    - name: Install the Splunk app
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk install app /tmp/splunkclouduf.spl
+        creates: /opt/splunkforwarder
+      when: not splunk_is_installed.stat.exists
+
+    - name: Create User-Seed Config File
+      copy:
+        dest: "/opt/splunkforwarder/etc/system/local/user-seed.conf"
+        content: |
+          [user_info]
+          USERNAME = {{ splunkadmin }}
+          PASSWORD = {{ splunkpassword }}
+      when: not splunk_is_installed.stat.exists         
+
+    - name: Start the Splunk forwarder
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk start --accept-license --no-prompt --seed-passwd
+      when: not splunk_is_installed.stat.exists
+
+    - name: Deploy Poll
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk set deploy-poll 10.111.10.37:8089
+      when: not splunk_is_installed.stat.exists  
+
+    - name: Restart the Splunk forwarder
+      command:
+        cmd: /opt/splunkforwarder/bin/splunk restart
+      when: not splunk_is_installed.stat.exists      

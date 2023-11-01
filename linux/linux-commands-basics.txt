@@ -1,0 +1,111 @@
+SSH (VMs):
+ssh plex@192.168.1.251
+ssh fhashem@192.168.1.219
+
+Plex:
+docker run -d --name plex-docker --network=host -e TZ="America/New_York" -v ~/docker/plex/data:/config -v ~/docker/plex/transcode:/transcode -v ~/docker/plex/media:/data plexinc/pms-docker
+
+scp -rp ~/Movies/Docker-Plex/* plex@192.168.1.251:~/docker/plex/media/
+
+Basic Commands:
+
+cd - will always take you back to your home directory
+cd / - will take you to your root directory
+cd ../myfile.pdf - will take you one level up and open file in there
+Ls - Lists all folders and foles
+ls -a -l -List all folders and its permissions
+Mkdir - makes directories 
+Pwd - present working directory
+Mkdir -p : creates directory tree (creates all folders in /tmp/dir/test/myfolder)
+rm -r /tmp/dir/test/myfolder : Removes entire directory
+cp -r /tmp/dir/test/myfolder: Copies entire directory (recursively)
+cp file.pdf folder/ - copies file over to the folder directory
+Touch filename.txt : Create file with no content
+Echo $test > testing.txt, echo "write the info here" >> testing.txt (this will generate a text file with details)
+
+Add content in the file: 
+	Cat > filename.txt 
+	(this will open editor in the command window, use CTRL_D to save and exit)
+
+View content of the file: 
+	cat filename.txt
+
+cp source.txt target.txt: Copy a file
+mv oldfile.txt folder/newfile.txt: Move a file 
+ln /john/file.txt /anna/file.txt - this will hard link 2 users to the same file.
+ln -s /john/file.txt file-shortcut.txt - this will create a shortcut. The permissions will have a lrwxrwxrwx
+readlink file-short.txt - Can view the original file location
+Echo $HOME : shows your home directory
+Git = File command
+Uname -r : shows current version you are running in regards to kernal, major, minor, patch version
+Dmesg - prints messages by kernal
+Lsblk - shows the number of disk drives and others
+Sudo - runs as administrator
+Sudo ls -l /sbin/init - find out init process in the machine
+Sudo systemctl get-default - discover default systemmd target (multi-user target or graphical target)
+Sudo systemctl set-default multi-user.target - changes to Multi-User target
+Block devices and Device node are located under /dev 
+Sudo lshw - gives full description of computer info
+
+Du -sh or -lh - allows you to see the disk usage of the current directory
+
+Tar - groups multiple files or directories into a single file. Esp used for archiving data. 
+	Tar -cf : (c: create a archive. f: creates the name of the file)
+		Tar -cf test.tar file1 file2
+	Ls -ltr test.tar 
+	Tar -tf test.tar : used to see contents of file
+	Tar -xf test.tar : used to extract the file
+	Tar -zcf : compress tar file to reduce its size
+
+Bzip2: test.img --> test.bz2 : can un-compress using bunzip2 test.img.bz2
+Gzip: gzip test1.img --> test.img.gz : can un-compress using gunzip test1.img.gz
+Xz: xz test2.img --> test2.img.xz : unxz test2.img.xz
+You can read compressed files without un-compressing them by running zcat / bzcat / xzcat (ex. Zcat test.txt.bz2)
+
+SSH in Linux: 
+
+sudo apt install openssh-server : Enable SSH on a Linux Server
+
+Searching in Linux:
+
+Locate city.txt --> helps you find the file (search option) - will not work properly if you just installed linux since DB havent been udpated yet. Can run the updatedb command and then run locate again
+Find /home /michael -name city.txt --> helps you find files under certain directories
+Grep: Search within files. Print lines of files matching a pattern. (grep second sample.txt --> Output will be followed by the second line)
+
+Grep -i : grep is automatically case sensitive, but if you want to search using insensitive words, then use -i. 
+Grep -r : This will search recursively for a word through out the directory. (Ex. Grep -r "third line" /home/michael --> output will be ./sample.txt: And then the third line) 
+Grep -v : This will find any line in the file that does NOT match the string you entered. (ex. Grep -v "printed" sample.txt) will give you all lines that doesn’t have printed in it
+
+You can also use partial grep. Like grep exam examples.txt. OR grep -w exam examples.txt --> this will give you the whole word you are looking for in the lines. 
+	To reverse, grep -vw exam examples.txt (this will give you any line that doesn’t have the word exam in it)
+
+You can also use grep -A1 Arsenal premier-league-table.txt, this will give you values that includes 1 below. You can also use a number instead of the value Arsenal. That will give you the key and the value result and whatever that’s below that result.
+
+VI Editor:
+
+vi /home/michael/sample.txt - goes to command mode right away, only understands commands. Copy, paste or delete lines.
+i : enter this if you want to enter the 'insert mode' (this mode allows you to edit file, add text and remove text) - you can also use the following letters to enter the insert mode (O A I i a o)
+Esc: click the esc button to go back to command mode
+: -- this key will take you to the 'last line' mode (this mode allows you to save file, discard changes and exit vi editor).
+Esc: click the esc button to go back to the command mode
+K: up
+H: left
+J: down
+L: right
+
+Mouse you can use to highlight
+To copy a line use: y y keys
+To paste a line use: p key
+To save a file use: uppercase Z Z
+To delete a letter: move the cursor to the location and type x
+To delete a line: move cursor anywhere on the line and type d d
+To delete 3 lines from current line: use d 3 d
+Undo previous change, type u
+Redo: CTRL r
+To search use: / or ? Key followed by pattern: /line (it will then move to the location). To go next type n , to go previous type N
+? Line : goes backwards
+To save: you need to enter the last line mode using : and then enter :w
+To exit- use :q
+To exit and save- use :wq
+To exit without saving- use :q!
+

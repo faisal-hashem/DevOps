@@ -1,0 +1,18 @@
+#Installing plugins and restarting after for some plugins
+sudo systemctl restart jenkins
+
+#Use Jenkins cli to run commands:
+java -jar jenkins-cli.jar -s http://localhost:8085 -auth 'admin:Adm!n321' type-your-command
+
+#install a plugin:
+#Go to Plugins UI and find this: jenkins-plugin-cli --plugins cloudbees-bitbucket-branch-source:848.v42c6a_317eda_e
+#Grab plugin name and add it to the command section of the cli remote screen:
+
+java -jar jenkins-cli.jar -s http://localhost:8085 -auth 'admin:Adm!n321' install-plugin cloudbees-bitbucket-branch-source
+
+#Update a plugin
+java -jar jenkins-cli.jar -s http://localhost:8085 -auth 'admin:Adm!n321' install-plugin cloud-stats 
+
+#Disable a plugin
+java -jar jenkins-cli.jar -s http://localhost:8085 -auth 'admin:Adm!n321' disable-plugin github
+

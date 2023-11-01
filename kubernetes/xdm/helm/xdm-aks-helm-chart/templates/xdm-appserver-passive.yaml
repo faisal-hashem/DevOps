@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.passive.name }}
+  labels:
+    app: {{ .Values.app.passive.name }}
+  namespace: {{ .Values.namespace }}  
+spec:
+  replicas: {{ .Values.app.passive.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.passive.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.passive.name }}
+    spec:
+      containers:
+        - image: {{ .Values.app.passive.image }}
+          name: {{ .Values.app.passive.name }}
+          resources:
+            requests:
+              memory: {{ .Values.app.passive.requestsMemory }}
+            limits:
+              memory: {{ .Values.app.passive.limitsMemory }}
+          ports:
+            - containerPort: {{ .Values.app.passive.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.app.passive.configMapRef }}
+          volumeMounts:
+            - name: {{ .Values.volume.name }}
+              mountPath: {{ .Values.app.passive.mountPath }}
+              readOnly: {{ .Values.app.passive.readOnly }}
+          env:
+            - name: SEMARCHY_SETUP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.setupToken.name }}
+                  key: {{ .Values.secrets.setupToken.key }}
+            - name: XDM_REPOSITORY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.repoPassword.name }}
+                  key: {{ .Values.secrets.repoPassword.key }}
+            - name: XDM_REPOSITORY_READONLY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.repoROPassword.name }}
+                  key: {{ .Values.secrets.repoROPassword.key }}
+      restartPolicy: Always
+      volumes:
+        - name: {{ .Values.volume.name }}
+          csi:
+            driver: {{ .Values.volume.driver }}
+            readOnly: {{ .Values.app.passive.readOnly }}
+            volumeAttributes:
+              secretProviderClass: {{ .Values.volume.secretProviderClass }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.app.passive.name }}
+  labels:
+    app: {{ .Values.app.passive.name }}
+  namespace: {{ .Values.namespace }}    
+spec:
+  ports:
+    - port: {{ .Values.app.passive.servicePort }}
+  selector:
+    app: {{ .Values.app.passive.name }}

@@ -1,0 +1,90 @@
+You can type df -hP to view all mounted file systems and location. 
+
+/bin: 
+	Basic commands and binaries are located in here. Ex. cat, mkdir, cp, ls
+/sbin:
+	System commands (ifconfig, ping, shutdown)
+/dev: 
+	Contains external devices such as external HDs, bluetooth, mouse and keyboards. The special blocks and character device files
+/etc: 
+	Stores most of the config files in linux
+/home: 
+	Contains all users directories except for root user (that is in /root)
+/lib: 
+	Location for shared libraries that need to be imported into your programs
+/media: 
+	USB drive location when attached. Contains external media files. However certain external devices such as external HDs and mouse/keyboards go to the /dev/ sdb1 (the special blocks and character device files)
+/mnt:
+	Use mount command to mount any software package to computer here. Unmount software afterwards from here. And delete file from /tmp
+/opt: 
+	Install any 3rd party software in here (WebApps)
+/tmp: 
+	Temporary files. All users have permission to place temporary files here.
+/usr: 
+	All the userland applications and their data resides in here. Before it was used for users home directories. Ex. Thunderbird mail client, mozilla firefox, VI test editor.
+/var: 
+	Look at the Logs over here when you run into any issues with apps. Cached data is in here as well.
+/boot:
+	Static files of the boot loader
+/proc:  
+	Process information pseudo-filesystem. An interface to kernel data structures.
+/root  
+	The root (superuser) home directory.
+
+
+#This is mainly all the directories under /usr as you can see it has its own set of linux directories:
+
+/usr	The base directory for most shareable, read-only data (programs, libraries, documentation, and much more).
+/usr/bin	Most user programs are kept here (cc, find, du, etc.).
+/usr/include	Header files for compiling C programs.
+/usr/lib	Libraries for most binary programs.
+/usr/local	“Locally” installed files. This directory only really matters in environments where files are stored on the network. Locally-installed files go in /usr/local/bin, /usr/local/lib, etc.). Also often used for software packages installed from source, or software not officially shipped with the distribution.
+/usr/sbin	Non-vital system binaries (lpd, useradd, etc.)
+/usr/share	architecture-independent data (icons, backgrounds, documentation, terminfo, man pages, etc.).
+/usr/src	Program source code. E.g. The Linux Kernel, source RPMs, etc.
+/usr/X11R6	The X Window System.
+
+
+
+NFS File System:
+
+NFS Stores data in the form of files. 
+
+NFS Servers stores a EXPORTS file that contain the information of all the clients that can access the servers file system. You can find it in /etc/exports. This will contain the IPS of all the clients that can access the file system. There should be a firewall between the NFS Server and the Clients. Once the EXPORTS file has been updated on the server. 
+
+You can run the exportsfs -a command to distribute the data to the clients so they can connect. Exportsfs -o IPADDRESS:/software/repos allows us to manually distribute this file to a specific directory. 
+
+Once exported, you can manually run the mount command. 
+	Run: mount 10.61.112.101:/software/repos  /mnt/spftware/repos 
+	
+In order to use the Partitions, you need to create a File System and then Mount it after 
+EXT 2 and 3 are file ststems. EXT 3 is better with crash recovery. But they are both similar in file size 
+EXT 4 is the most used, supports 16 TB of file size. This is backward compatible, can be mounted as EXT 2 and 3.  
+Run: sudo df -h to see status of the current file systems  
+Run: blkid /dev/filesystemname to find out what ext is the file system created under 
+Run: mkfs.ext4 /dev/sdb1 = this will create the file system in the partition 
+Run: mkdir /mnt/ext4 and run: mount /dev/sdb1   /mnt/ext4 to mount the file system to the partition.  
+Run: mount | grep /dev/sdb1 OR run: df -hP | grep /dev/sdb1 to check the status 
+To make the mount be available after the system REBOOTs, add the FSTAB command at the end.  
+In order to do this, you need to first: 
+Sudo vi /etc/fstab  
+Add line: /dev/filesystemname  /mnt/data ext rw 0 0  
+Save and exit the editor by running :wq 
+
+Save and exit the editor by running :wq 
+
+DAS: a block device that conencts directly and perform excellently. No firewall in between. It is dedicated to a single server so it is not suitable for enterprise.  
+ 
+NAS: Suitable for mid to large business. Located apart from the host, connected through the network. Might be located in the same rack but will have to transfer to the network. This is also a block storage device. Centralized shared storage that needs to be accessed by multiple hosts. HA storage solution. Backend storage for web app or even DB. NAS is not recommended for OS. 
+ 
+SAN: Provides block storages, business critical apps that needs to perform high throughput and low latency. Storage is allocated to a host in form of a LUN  
+ 
+LUN (Logical Unit Number): a range of blocks provisioned from a pool of shared storage and presented to a server as a logical disk. The host system will detect the storage as a raw disk. We can then create partitions and file systems on top of it as we would with any other block device and mount on the system to store data.  
+ 
+SAN can be ethernet based but it mainly makes use of the FCP (Fiber Channel Protocol), this makes use of the fiber channels switch.  
+ 
+The host server makes use of HBA Host Bus Adapter. Connected to the PCI slot interface of the Fiber channel switch.  
+ 
+SAN is better than NAS due to its performance and will work great with DBs  
+
+

@@ -1,0 +1,35 @@
+- name: Update and install packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache and upgrade all packages
+      apt:
+        upgrade: dist
+        update_cache: true
+
+    - name: Install basic app packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - net-tools
+          - curl
+
+- name: Install-Rubrik
+  ansible.builtin.import_playbook: rubrik.yml
+
+- name: Install-Powershell
+  ansible.builtin.import_playbook: powershell.yml
+
+- name: Install-Crowdstrike
+  ansible.builtin.import_playbook: crowdstrike.yml
+
+- name: Install-Qualys
+  ansible.builtin.import_playbook: qualys.yml
+
+- name: Install-Splunk
+  ansible.builtin.import_playbook: splunk-uf.yml
+
+- name: Install-AuditD
+  ansible.builtin.import_playbook: auditd.yml  

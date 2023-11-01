@@ -1,0 +1,29 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Copy Crowdstrike
+      copy:
+        src: ~/ansible/packages/crowdstrike/falcon-sensor_7.02.0-15705_amd64.deb
+        dest: /tmp/falcon-sensor_7.02.0-15705_amd64.deb
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Crowdstrike Agent
+      apt:
+        deb: /tmp/falcon-sensor_7.02.0-15705_amd64.deb
+        state: present
+
+    - name: Set up CID for Crowdstrike
+      command:
+        cmd: "/opt/CrowdStrike/falconctl -s --cid=78C766B647DF4647B2EFA7B1800364D0-42 -f"
+
+    - name: Ensure falcon-sensor service is started
+      service:
+        name: falcon-sensor 
+        state: started
+
+    - name: Ensure falcon-sensor systemctl service is started
+      systemd:
+        name: falcon-sensor 
+        state: started

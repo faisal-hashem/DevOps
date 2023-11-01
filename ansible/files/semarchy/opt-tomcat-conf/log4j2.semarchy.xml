@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Configuration>
+
+    <Appenders>
+
+        <!-- Console Appender -->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%t] %p %c - %m%n"/>
+        </Console>
+
+        <!-- Tomcat Appender -->
+        <RollingFile
+                fileName="${sys:catalina.base}/logs/semarchy.log"
+                filePattern="${sys:catalina.base}/logs/semarchy.%d{yyyy-MM-dd}.log"
+                name="TOMCAT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm s S}-%X{authenticatedUser}-%t-%-5p-%-10c:%m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="2147483647"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Root Logger -->
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="TOMCAT"/>
+        </Root>
+
+        <!-- External libs shutdown -->
+        <Logger level="ERROR" name="org.apache.directory.shared.asn1.ber.Asn1Decoder"/>
+        <Logger level="WARN" name="org.apache.commons.beanutils.converters"/>
+        <Logger level="WARN" name="org.quartz"/>
+        <Logger level="WARN" name="org.ops4j.pax.logging"/>
+        <Logger level="WARN" name="org.apache.cxf"/>
+        <Logger level="WARN" name="org.apache.cxf.services"/>
+        <Logger level="ERROR" name="org.apache.cxf.jaxrs.impl.WebApplicationExceptionMapper"/>
+        <Logger level="WARN" name="org.apache.cxf.services.WebClient"/>
+        <Logger level="WARN" name="org.apache.aries.blueprint"/>
+        <Logger level="OFF" name="org.apache.aries.blueprint.container.ServiceRecipe"/>
+        <Logger level="OFF" name="org.apache.aries.blueprint.container.BlueprintContainerImpl"/>
+        <Logger level="INFO" name="org.apache.jasper.servlet"/>
+        <Logger level="WARN" name="org.apache.aries.spifly"/>
+        <Logger level="INFO" name="com.sun.xml"/>
+        <Logger level="INFO" name="com.zaxxer.hikari"/>
+        <Logger level="INFO" name="javax.xml.bind"/>
+        <!-- Remove verbose WARN on Tika Parser see: https://issues.apache.org/jira/browse/TIKA-2518 -->
+        <Logger level="ERROR" name="org.apache.tika.parser.SQLite3Parser"/>
+        <Logger level="INFO" name="org"/>
+
+        <!-- Semarchy Loggers -->
+        <Logger level="INFO" name="com.semarchy"/>
+        <Logger level="INFO" name="com.semarchy.commons.sql"/>
+        <Logger level="WARN" name="org.springframework.jdbc.core.JdbcTemplate"/>
+        <Logger level="WARN" name="org.springframework.jdbc.core.StatementCreatorUtils"/>
+        <Logger level="WARN" name="org.apache.aries.blueprint.container"/>
+        <Logger level="INFO" name="com.semarchy.platform.engine.core.impl.product.SL4JExecutionMonitor"/>
+        <Logger level="INFO" name="com.semarchy.platform.engine"/>
+        <Logger level="INFO" name="com.semarchy.platform.setup.IPlatformManager"/>
+        <Logger level="INFO" name="com.semarchy.mdm.datahub.services.query.datamgr.IDataManager"/>
+        <!-- Plug-in Execution logging. Set to Debug to troubleshoot plugins. -->
+        <Logger level="INFO" name="com.semarchy.platform.engine.PluginExecution"/>
+        <Logger level="INFO" name="com.semarchy.platform.repository.domain.restclient.RestClientInstance"/>
+        <!-- Integration Batch Notification logger to be notified when notification errors occurs -->
+        <Logger level="INFO" name="com.semarchy.platform.product.notification.PlatformNotificationHandler"/>
+        <!-- Import / Export -->
+        <Logger level="INFO" name="com.semarchy.mdm.dataui.domain.dataimport"/>
+        <Logger level="INFO" name="com.semarchy.mdm.dataui.domain.dataexport"/>
+        <!-- Consistency Checker -->
+        <Logger level="INFO" name="com.semarchy.ui.platform.console.actions.CheckConsistencyAction"/>
+        <!-- Public REST API logger -->
+        <Logger level="INFO" name="com.semarchy.xdm.rest.accesslog"/>
+
+    </Loggers>
+
+</Configuration>

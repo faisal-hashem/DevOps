@@ -1,0 +1,1 @@
+1..4 | % -Parallel {If ((Test-Connection uc1p-rubrik0$_ -Count 2 -Delay 1).Status -eq "Success") {Write-Host "$_ - OK"} else {Write-Host "$_ - Not OK" -ForegroundColor Red}}

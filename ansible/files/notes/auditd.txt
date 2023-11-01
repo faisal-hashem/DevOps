@@ -1,0 +1,67 @@
+sudo apt update
+sudo apt install auditd audispd-plugins
+sudo systemctl start auditd
+sudo systemctl enable auditd
+vi /etc/audit/rules.d/audit.rules
+
+Add the following: 
+
+#Monitor user account changes
+-w /etc/passwd -p wa -k passwd_changes
+#Log all executions
+-a always,exit -F arch=b64 -S execve -k exec_logging
+#Changes to /etc
+-w /etc/ -p wa -k etc_changes
+#Changes to /opt/tomcat directory
+-w /opt/tomcat -p wa -k tomcat_changes
+
+Activate audit rules:
+sudo auditctl -R /etc/audit/rules.d/audit.rules
+
+Search audit rules:
+sudo ausearch -k tomcat_changes
+
+View auditd status:
+sudo auditctl -s
+
+View auditd rules:
+sudo auditctl -l
+
+View auditd service:
+sudo systemctl restart auditd
+
+
+num_logs = 5: This represents the number of log files to keep on your system. When this limit is reached, the oldest log will be deleted if the max_log_file_action is set to ROTATE.
+
+priority_boost = 4: This sets the priority boost for the audit daemon by the specified value. This can be useful to make sure audit logs are processed quickly.
+
+space_left = 75: This is a threshold for available disk space, measured in megabytes. If the space drops below this level, the action specified in space_left_action will be taken.
+
+admin_space_left = 50: This is another disk space threshold, also in megabytes. If the space drops below this level, the action specified in admin_space_left_action will be taken.
+
+tcp_listen_queue = 5: This is the maximum number of outstanding audit records allowed in the TCP listen queue.
+
+tcp_max_per_addr = 1: This is the maximum number of concurrent connections allowed from a single IP address.
+
+tcp_client_max_idle = 0: This is the number of seconds of idle time before the audit daemon will disconnect a client. Setting it to 0 means it's disabled, and clients can remain connected indefinitely.
+
+q_depth = 1200: This is the queue depth, which represents the number of outstanding audit buffers allowed. If this is exceeded, the action specified in overflow_action will be taken.
+
+max_restarts = 10: This is the maximum number of restart attempts made by the audit daemon if there's a problem.
+
+end_of_event_timeout = 2: This is the number of seconds the audit daemon will wait for an event to complete before taking the action specified in disk_error_action.
+
+
+max_log_file_action = ROTATE: When the log file reaches its max size, it will be rotated, meaning a new log file will be started, and the oldest will be deleted if the number of logs exceeds num_logs.
+
+space_left_action, admin_space_left_action, disk_full_action, and disk_error_action all specify actions to take under different circumstances. For example, if the space drops below the space_left threshold, the SYSLOG action will send a message to syslog.
+
+use_libwrap = yes: This enables or disables TCP wrappers support.
+
+transport = TCP: This specifies that the audit daemon will use TCP for transport.
+
+krb5_principal = auditd: This is the Kerberos principal name for the audit daemon.
+
+distribute_network = no: This determines whether to send the logs to other machines.
+
+plugin_dir = /etc/audit/plugins.d: This specifies the directory where audit plugins reside.

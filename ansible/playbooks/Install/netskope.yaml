@@ -1,0 +1,15 @@
+- hosts: "ubuntu"
+  become: true
+  tasks:
+    - name: Copy Netskope
+      copy:
+        src: ~/ansible/packages/netskope/netskope-STAgent_amd64.deb
+        dest: /tmp/netskope-STAgent_amd64.deb
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Netskope Agent
+      apt:
+        deb: /tmp/netskope-STAgent_amd64.deb
+        state: present

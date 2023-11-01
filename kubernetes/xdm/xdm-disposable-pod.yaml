@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: -disposable-pod
+spec:
+  containers:
+    - name: pg-sql
+      image: postgres:14-alpine
+      command: [ "bash", "-c", "sleep infinity" ]
+      resources:
+        requests:
+          memory: "200Mi"
+        limits:
+          memory: "250Mi"
+      envFrom:
+        - configMapRef:
+            name: -config    
+      volumeMounts:
+      - name: secrets-store01-inline
+        mountPath: "/mnt/secrets-store"
+        readOnly: true
+      env:
+      - name: _SETUP_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: setup-token
+            key: -setup-token
+      - name: _REPOSITORY_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: repo-password
+            key: -repo-password
+      - name: _REPOSITORY_READONLY_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: repo-ro-password
+            key: -repo-ro-password              
+  volumes:
+    - name: secrets-store01-inline
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "-azure-secret-provider"      

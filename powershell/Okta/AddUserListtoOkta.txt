@@ -1,0 +1,57 @@
+﻿$people = Get-Clipboard
+$aou = oktaListActiveUsers
+$aou | gm
+$aou | select -First 1
+$aou.profile | gm
+$aou.profile | more
+$people
+
+
+
+
+  65        0.017 $people
+  66        0.006 ("Mark Traiman").split(" ")
+  67        0.002 ("Mark Traiman").split(" ")[0]
+  68        0.001 ("Mark Traiman").split(" ")[1]
+  69        0.002 ("Mark Traiman").split(" ")[0]
+  70        0.001 (("Mark Traiman").split(" ")[0].Substring(0,1))
+  71        0.002 "Mark"
+  72        0.011 ("Mark").Substring(0,2)
+  73        0.002 ("Mark").Substring(0,3)
+  74        0.155 ("Mark").Substring(2,4)
+  75        0.135 ("Mark").Substring(2,3)
+  76        0.001 ("Mark").Substring(0,3)
+  77        0.000 #foreach ($person in $people)
+  78        0.021 $people
+  79        0.025 foreach ($person in $people){$person.split(" ")[0]}
+  80        0.024 foreach ($person in $people){($person.split(" ")[0]).Substring(0,1)}
+  81        0.019 foreach ($person in $people){($person.split(" ")[0]).Substring(0,1)+$person.split(" ")[1]}
+  82        0.082 foreach ($person in $people){($person.split(" ")[0]).Substring(0,1)+$person.split(" ")[1]+"@generalatlantic.com"}
+  83        0.003 $users = foreach ($person in $people){($person.split(" ")[0]).Substring(0,1)+$person.split(" ")[1]+"@generalatlantic.com"}
+  84        0.012 $users
+  85        0.997 $aou | where {$_.profile.email -in $users}
+  86        0.031 $aou | where {$_.profile.email -in $users} | measure
+  87        0.018 $people | measure
+  88        0.025 $people.trim() | measure
+  89        0.060 $users
+  90        3.081 $users | % {Get-ADUser $_.replace("@generalatlantic.com","")}
+  91        0.034 $users
+  92        0.156 $users.replace("cgomez@generalatlantic.com,cogomez@generalatlantic.com")
+  93        0.081 $users.replace("cgomez@generalatlantic.com","cogomez@generalatlantic.com")
+  94        0.090 $users.replace("cgomez","cogomez")
+  95        0.089 $users.replace("cgomez","cogomez") | sort
+  96        0.004 ("cgomez").replace("cgomez","cogomez")
+  97        0.001 ("cgomez@generalaetlantic.com").replace("cgomez","cogomez")
+  98        0.068 $users.replace("CGomez","COgomez") | sort
+  99        0.001 $users = $users.replace("CGomez","COgomez")
+ 100        0.011 $users | measure
+ 101        0.034 $aou | where {$_.profile.email -in $users} | measure
+ 102        0.078 $aou | where {$_.profile.email -in $users} | select id
+ 103        0.031 $aou | where {$_.profile.email -in $users} | select -expand id
+ 104        0.015 $usersToAdd = $aou | where {$_.profile.email -in $users} | select -expand id
+ 105        0.051 $usersToAdd
+ 106        0.056 $aou | where {$_.profile.email -like "cogomez*"}
+ 107        0.002 $usersToadd = "00uu2axyje2N2fqvb0x7"
+ 108        0.016 $users
+ 109        0.001 $usersToAdd
+ 110        0.377 foreach ($user in $usersToAdd){oktaAddUseridtoGroupid -uid $user -gid "00gwyy30u8qVhQ52l0x7" -oOrg srf}

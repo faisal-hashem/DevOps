@@ -1,0 +1,80 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: true
+        upgrade: 'yes'
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - python3-pip
+          - git
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - python3-setuptools
+          - xrdp
+          - xfce4
+          - xfce4-goodies
+        state: latest
+        update_cache: true
+
+    - name: Create .xsession file for user
+      become: yes
+      become_user: bossaccount
+      shell: echo "xfce4-session" > ~/.xsession
+      args:
+        executable: /bin/bash
+
+    - name: Restart xrdp to ensure changes take effect
+      systemd:
+        name: xrdp
+        state: restarted
+
+    - name: Allow RDP connections in UFW
+      ufw:
+        rule: allow
+        port: '3389'
+        proto: tcp
+
+    - name: Add Docker official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Verify that we have the key with the fingerprint
+      apt_key:
+        id: 0EBFCD88
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+        update_cache: true
+
+    - name: Update apt and Install Docker CE
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Install docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.25.1-rc1/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: "u+x,g+x"
+      
+    - name: Ensure docker and containerd services are started and enabled on boot
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      with_items:
+        - docker
+        - containerd 
+
+- name: Install-Basic-Apps
+  ansible.builtin.import_playbook: basic-apps.yml          

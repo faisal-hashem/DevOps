@@ -1,0 +1,19 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Register Microsoft APT repository's key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Microsoft APT repository for PowerShell
+      apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-{{ ansible_distribution_release }}-prod {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: true
+
+    - name: Install PowerShell
+      apt:
+        name: powershell
+        state: latest

@@ -1,0 +1,30 @@
+---
+- name: Uninstall XRDP
+  hosts: "ubuntu"
+  become: yes
+
+  tasks:
+    - name: Stop the XRDP service
+      systemd:
+        name: xrdp
+        state: stopped
+
+    - name: Remove XRDP package
+      apt:
+        name: xrdp 
+        state: absent
+
+    - name: Ensure the XRDP configuration directory is removed
+      file:
+        path: /etc/xrdp
+        state: absent
+
+    - name: Ensure the XRDP user configuration directory is removed
+      file:
+        path: /home/bossaccount/.config/autostart
+        state: absent
+
+    - name: Delete the .xsession file
+      file:
+        path: /home/bossaccount/.xsession
+        state: absent

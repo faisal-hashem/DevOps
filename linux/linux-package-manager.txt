@@ -1,0 +1,84 @@
+Software Package: is a compressed archive that contains all the files required for a software to run. 
+
+Purpose of a Package Manager: Different Linux OS and versions requires different dependency files for a software package to run. Its not as easy as installing the software package on a OS and you are done. You need to make sure the OS has all the dependent files before the software package and successfully install. Package Manager ensure that
+
+Process of a Package Manger: This is a software in a linux system that is in charge of automating the process of installing, updating, removing, configuring packages in the OS. 
+	- Ensure package integrity and authenticity by confirming certificates
+	- Simplifying Package Management options. 
+	- Grouping packages by functions
+	- Managing dependencies
+
+Types of PM:
+	- DPKG: base for Debian based distribution
+	- APT: newer front-end for the DPKG systems, runs in Ubuntu, Linux Mint, elementary OS (Debian based)
+	- APT-GET: Debian based Distributions
+	
+	- RPM: base package mgmt. in red hat based distribution, red hat, CentOS, fedora
+	- YUM: Red-hat Distro
+	- DNF:  Red-hat disto
+
+RPM:
+	- Used in CentOS, Red HAT, Fedora
+	- File extension is .rpm
+	- 5 modes:
+		○ Installing, uninstalling, upgrade, query and verifying
+		○ Run them in command by the command and packagename.rpm after
+			§ Ex. (Rpm -ivh packagename.rpm)
+			§ -i install
+			§ -v verbose - print detailed output of command
+			§ -e uninstall command
+			§ -Uvh upgrade command 
+			§ -q to get info (query)
+			§ -Vf verifies info of the package. To make sure its from trusted source
+		
+		○ RPM database is stored in: /var/lib/rpm 
+		
+	- However, RPM does not resolve package dependencies on its own, it needs to use YUM to do that
+	
+YUM: 
+	- Yellowdog Updater Modified (free and open source, works on RPM)
+	- Works on software repos (stored in etc/yum.repos.d
+	- Still depends on RPM 
+	- Able to install any dependent package
+	- Depends on a huge software repo, can be stored on laptop or remote location that is accessed to HTTPS, FTP, HTTP
+	- Info about the repository is saved in /etc/yum.repos.d
+	- YUM PM used RPM PM. It points to the local repo on  /etc/yum.repos.d/redhat.repo (offical red hat managed software repo)
+	- You can also make new repo in this directory if the official repo doesn’t have the latest vesion of the sofrware you want to install or not have it at all. In that case you want to create a third party repo
+
+YUM Process:
+	- Yum install httpd (runs a transaction check, if the package is not in the system, it checks the repo.d for the package, it then checks for dependencies, then you get transaction summary, click Y to download/install (-y passes this prompt). 
+	- Command 
+		○ Yum repolist: shows you all the repos added to your system
+		○ Yum provides scp: if you want to check which package for a specific command to work. Tells you need openssh client package
+		○ Yum remove httpd 
+		○ Yum update telnet (package name): installing the single update for telnet
+		○ Yum update: update all packages installed in the system and mark any that can be updated. Or new packages that can be installed 
+DPKG
+	- Debian Package Manager (low level manager)
+	- Used to install, remove, upgrade, list, verify
+	- Dpkg -i packagename
+	- Dpkg -r remove package
+	- Dpkg -l list packacage with name and version
+	- Dpkg -s status of package
+	- -p <path> display details about pacakages 
+
+APT/APT-GET
+	- APT: Advanced Package Managers (more user friendly than APT-GET)
+	- APT is already installed by default. Easy on the eye too. Apt-Get does not provide the output in user friendly format. 
+	- Apt search packagename works but does not work in apt-get, instead have to use apt-cache search packagename, throws extra info that is not necessary
+	- Similar to YUM, as it is a dependency manager 
+	- Apt install gimp
+	- Apt-get install gpm
+	- Apt acts as a front end package manager, relies on a software repo as well. /etc/apt/sources.list (local) or remote http, https, ftp as well
+	
+
+APT Commands:
+	- Apt update : referesh the repo. Download package info from all available sources. Right after adding new sources or right after installing the OS
+	- Apt upgrade : install all available upgrades from all package
+	- Apt edit-sources : use this to update the repos, it will open up the editor, so you can add repos in it (located in /etc/apt/source.list)
+	- Update it directly too (sources.list)
+	- Apt install packagename : install 
+	- Apt remove packagename : remove
+	- Apt search packagename : look for package in repo
+	- Apt list | grep packagename : list all the available packages
+	- DO NOT use FULL package name firefox.deb, use app name firefox only

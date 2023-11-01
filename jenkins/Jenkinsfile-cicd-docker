@@ -1,0 +1,27 @@
+#Download plugins for Go, Docker (API, Commons, Pipeline, plugin), docker installed on the build server too.
+pipeline {
+    agent any
+    tools {
+        'go-1.17'
+    }
+
+    environment {
+        GO111MODULE='on'
+    }
+
+    stages{
+        stage('Development') {
+            steps {
+                git 'https://github.com/AdminTurnedDevOps/go-webapp-sample.git'
+            }
+        }
+
+        stage('Building our image') {
+            steps {
+                script {
+                    app = docker.build("adminturneddevops/go-webapp-sample")
+                }
+            }
+        }
+    }
+}

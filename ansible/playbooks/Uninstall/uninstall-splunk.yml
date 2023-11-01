@@ -1,0 +1,49 @@
+---
+- name: Uninstall Splunk Universal Forwarder
+  hosts: your_target_hosts
+  become: yes
+  tasks:
+    - name: Stop Splunk service
+      command: /opt/splunkforwarder/bin/splunk stop
+      ignore_errors: yes
+
+    - name: Disable Splunk boot-start
+      command: /opt/splunkforwarder/bin/splunk disable boot-start
+      ignore_errors: yes
+
+    - name: Remove Splunk installation directory
+      file:
+        path: /opt/splunkforwarder
+        state: absent
+
+    - name: Remove splunkforwarder package
+      apt:
+        name: splunkforwarder
+        state: absent
+      ignore_errors: yes
+
+    - name: Remove splunk user
+      user:
+        name: splunk
+        state: absent
+        remove: yes
+      ignore_errors: yes
+
+    - name: Remove splunk group
+      group:
+        name: splunk
+        state: absent
+      ignore_errors: yes
+
+    - name: Check for startup scripts in /etc/init.d/
+      find:
+        paths: /etc/init.d/
+        patterns: 'splunk*'
+      register: startup_scripts
+
+    - name: Remove Splunk-related startup scripts
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ startup_scripts.files }}"
+      when: startup_scripts.matched > 0

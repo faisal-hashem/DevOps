@@ -1,0 +1,78 @@
+DNS method 1 in Linux: If you want to communicate with another machines IP, you can assign them a name to the VMs IP address in the host file. Which is under /etc/hosts
+
+You can run any command such as ping, ssh or curl to that name, it will resolve through the hosts file.
+
+New method: DNS Server
+
+	1. Configuring the DNS server to each of your VMs. Add entry /etc/resolv.conf and place nameserver = 192.168.1.100
+	2. Now the VM will look at the DNS server anytime it wants to resolve.
+	3. The hosts files always override. 
+	4. You can switch the order of events when resolving DNS. You can instead read the DNS server first and then the local hosts file. 
+		a. /etc/nsswitch.conf --.> you can make it to dns files instead of files dns
+
+You can have multiple DNS name servers configured in your /etc/resolv.conf file. You can add 8.8.8.8, which is googles DNS and it can also resolve outside generic websites for you
+
+	1. For this you can forward your name server to forward all unknown requests to 8.8.8.8 and it can then resolve it there such as facebook.com
+	2. It typically goes through the process of resolving by:
+		a. Org DNS --> Root DNS --> .com DNS --> Google DNS 
+		b. Normally it would cache it for you so it doesn’t have to go through the whole process each time
+
+In your own Org DNS, there is external requests and internal request. When you get someone from otuside your company trying to access web.mycompany.com, you will have to type the whole time. For internal, you can type web and it will automatically resolve to web.mycompany.com.. However you will need to enter the entry in your hosts file to say: search = mycompany.com 
+
+Record Types:
+
+	1. A Records: IP to Hostname
+	2. AAAA Records: IPv6 to Hostname
+	3. CNAME: mapping one name to another name: food.web-server = eac.web-server, hungry.web-server
+
+Other tools to look up:
+
+NSLookup: will resolve and look for IP associated with the hostname. But will look at the DNS server and NOT the hosts file
+
+DIG: This will give you much more info, use this going forward.
+
+Switching: To be able to communicate to another device from one VM to another VM.
+
+	1. Ip link: use this to see the interface on the VM. It will give you a result of eth0. This is to list and modify interface on the host
+		a. Sudo ip link set dev eth0 up, will bring the interface up
+	
+	2. Ip addr: used to see the assigned ips to that interface
+	3. Use the following command to add the IP address of the VM to the switch. You run this on the switch to add the VM to the switch.
+		a. Ip addr add 192.168.1.10/24 dev eth 0
+		b. ip addr add 192.168.1.11/24 dev eth 0
+		c. These changes are ONLY valid until system restarts, 
+		d. Now you will be able to communicate to the other VM and send host files across the network.
+
+Routing: When you need to communicate with another network. The router will be able to connect multiple switches so VMs from different networks will be able to communicate
+	a. You will need to first assign an IP address for each network to the router itself, so the router will be able to communicate with that network.
+	b. So how is one network going to know that the router is the actual router in the middle of all the network devices that is connected to the switch. This is when you need to assign a gateway. 
+	c. To see the existing gateways, run the route command
+		a. Route: will give you a list of destination and gateways
+		b. Configure a gateway, ip route add 192.168.2.0/24 via 192.168.1.1
+			i. You basically add the network switches IP address and then you add what IP address it will be going through on the route itself. So the via IP address, will be the IP address you gave it in the beginning to connect that specific network with your router
+			ii. This is basically adding a entry to the VMs routing table
+	d. In a situation where you want your network to be able to route outside to the internet, for example google or facebook, you can configure the router to route the anything unknown to that router to go out to the internet
+	e. Setting a Default Gateway: sudo ip route add default via 192.168.2.1
+
+Troubleshooting:
+
+	1. Check if the NIC is up
+	2. Check if you have connectivity with the DNS server
+	3. Do a trace route with the DNS server to see where the disconnect occurs
+	4. Do a netstat -an command on the DNS server to see why there is a connection issue with this server.
+		a. Command: netstat -an | grep 80 | grep -i LISTEN
+		b. If the result returns back the port number and through tcp, that means its good and the web server is up
+		c. You can also try running ip link on the DNS server itself to see if any of the NICs are down. 
+			i. Bring them up by running ip link set dev nicname up
+	DNS: on Linux all you have to do is update the host file manually on /etc/hosts and add the IP and Name of the machine you want to be able to ping. Then the ping should work. However the machine will take the name you place on the host file for granted, as it will think that is the name of that specific machine when it may not be. Managing host files definitely gets messy so this is why they created a DNS server. 
+
+You point at a DNS server on a linux machine by updating the /etc/resolv.conf file to include: cat /etc/resolv.conf
+
+However, even if you have a DNS server, if that ip address and name exists in the host file, it will resolve to that first. However you can change the order of precedence by modifying the /etc/nsswitch.conf file, just change the files dns to dns files]\ : cat /etc/nsswitch.conf
+
+In a scenario you want to resolve to a host name that is not on the host file or DNS server, such as www.facebook.com you can forward all unknown hostnames to 8.8.8.8 on the DNS server. 
+
+In a situation you are using a domain name such as mycompany.com for your internal and external dns resolving. It is ok if external has to ping web.mycompany.com but internally you want to resolve ping web by just that and not type ping web.mycompany.com each time. In this case, you want to add to the /etc/resolv.conf file the search mycompany.com entry right below nameserver x.x.x.x.  
+
+Nslookup is a useful tool to find out the IP address of a host name, BUT this only searches the DNS server and out. Does NOT search the internal host file.  
+DIG is also a useful tool to find out more information of a hostname. But does NOT search the local host file.  
