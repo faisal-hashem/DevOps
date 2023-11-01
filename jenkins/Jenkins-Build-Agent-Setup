@@ -1,0 +1,32 @@
+#On the Build Agent
+
+sudo adduser bob
+sudo usermod -aG sudo bob
+groups bob
+pw caleston123
+
+# Go to Jenkins, Manage Jenks, Credentials, Add New with same username and password
+# Go to Nodes and add a new node with permanant agent
+# 1 number of executor, remote root directory should be /home/bob
+#Launch agents via SSH, with IP of the build agent and the credentials.
+#Host key verification should be manually trusted key verification strategy 
+#Availability should be keep agent online as much as possible 
+
+#Set up Build Agent on Docker 
+
+
+
+pipeline {
+    agent {
+        docker { image 'golang:latest' }
+    }
+
+    stages {
+        stage ('Development'){
+            steps {
+                git 'https://github.com/AdminTurnedDevOps/go-webapp-sample.git'
+                sh 'go version'
+            }
+        }
+    }
+}
