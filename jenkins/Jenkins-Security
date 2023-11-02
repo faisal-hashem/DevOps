@@ -1,0 +1,29 @@
+1. Need to protect code and server due to the fact that this is an open source solution that is installed on a server. 
+
+2. User and Access Control: 
+    Authentication: Security Realm - Identity & Membership
+    Authorization: Who can edit what. (Permissions)
+        - Anyone can do anything - not recommended 
+        - Logged in users can do anything - need strategy in place - not recommended
+        - Anonymous and authenticated users - make sure anonymous dont have permissions
+        - built-in node - not every user should be able to run any job from this built-in node
+
+3. Managing and Securing Jenkins:
+    Plugins: Role-based Authentication Strategy, Authorize Project, Mask Password, etc. (all are useful to secure jenkins server)
+
+    Security panel: 
+        Configure Cred Providers: Different types such as Folder, Jenkins and user credential providers. 
+
+        Configure Global Security:
+            - Disable remember me
+            - Security Realm: LDAP, Unix user group DB, etc
+            - Agent Ports for TCP
+            - API Token - Enable API Token usage statistics 
+            - Agent Controller Security - Enable Agent - in order to secure build agents
+                Download plugin: build pipeline or others are useful to secure this access. 
+            - Use Jenkins as a SSH server for CLI commands (not the best idea)
+
+    Under configure global security, you can configure Matrix security. Can give anyone any type of access. Add groups, user.. Can assign various permissions here, specific permissions. Make sure they have overall read permissions to be able to view everything and then they can do the specifc permissions. 
+
+    Project based matrix strategy: Permissions based on the projects. 
+
