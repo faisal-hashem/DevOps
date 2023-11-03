@@ -119,16 +119,65 @@ items = [
     ("Product3", 12)
 ]
 
-items_2 = [
-    ("ProductX", 2),
-    ("ProductY", 3),
-    ("ProductZ", 5)
-]
-
-prices = list(map(lambda item: item[1], items_2))
+prices = list(map(lambda item: item[1], items))
 # item:item[1] this is any variable name, it is used to grab each line item in the list. [1] the index to sort by
-# items_2 - this is how lambda function knows what list to use
+# items - this is how lambda function knows what list to use
 # use list () since the map() will just bring in a map object.
 
 print(prices)
+
+
+# Filter lambda function: Get any value that is >= 10.
+
+items = [
+    ("Product1", 10),
+    ("Product2", 9),
+    ("Product3", 12)
+]
+
+prices = list(filter(lambda item: item[1] >= 10, items))
+
+print(prices)
+
+
+# List Commprehension: This generates the same results as the map list for lambda function: Little cleaner
+items = [
+    ("Product1", 10),
+    ("Product2", 9),
+    ("Product3", 12)
+]
+
+prices = [item[1] for item in items]
+print(prices)
+
+
+# List Comprehension for filtering: Lambda might be easier imo
+filtered = [item for item in items if item[1] >= 10]
+print(filtered)
+
+
+# convert 2 lists into tuples using Zip function:
+
+list1 = [1, 2, 3]
+list2 = [10, 20, 30]
+
+print(list(zip(list1, list2)))
+
+# can also pass in strings into this:
+print(list(zip("abc", list1, list2)))
+
+
+# using stack (last in First Out LIFO) - when you click back button on browser, it take you back 1 page.
+
+stack = []
+stack.append(1)
+stack.append(2)
+stack.append(3)
+print(stack)
+stack.pop()
+if not stack:
+    print("disable")
+print("redirect", stack[-1])
 '''
+
+# Queues: FIFO First In First Out

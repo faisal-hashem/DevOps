@@ -1,0 +1,23 @@
+Use Cases: 
+
+Repititive tasks
+App deployment
+Monitoring
+Testing
+Creating reports
+Setting up servers
+Rotating DB passwords 
+Use Python in Ansible to customize your own modules for your own use case
+Read data from csv file in s3 bucket
+
+Cloud Computing: 
+boto3 or apache lib cloud gives you the power to deploy app to the cloud using python. Maintain consistency. Can be integrated with TF. 
+
+Container/Orchestration:
+Kubernetes provides python to access their API to manager pods, deployments etc. using python
+
+Monitoring/Alerting:
+Prometheus: Extract metrics from server cpu, configure alert rule to send to group. Can also use Python with Flask to create custom monitoring apps. 
+
+Data/Visualization: 
+Analyze data in the future with matplotlib (create charts to visualize) or panda. 
