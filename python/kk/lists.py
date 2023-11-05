@@ -12,7 +12,7 @@ print(countries[-1]) #returns the last element of the list
 
 print(countries[::-1]) #returns the list in reverse order
 print(countries[1:]) #returns the rest of the elements of the list
-print(countries[:]) #returns the first element of the list
+print(countries[:]) #returns list as is
 print(countries[1:3]) #returns the first 2 elements of the list
 print(countries[::3]) #returns every third element of the list
 
@@ -35,8 +35,7 @@ print(countries)
 countries.reverse() #reverses the list
 print(countries)
 print(min(countries))
-'''
-'''
+
 #for loop iteration for averages
 total = 0
 ages = [20, 30, 40, 50, 60]
@@ -63,6 +62,7 @@ print(age2)
 age2 = age[:]
 age2[0] = 11
 print(age2)
+print(age)
 
 #prints list with index
 list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -147,7 +147,7 @@ print(matrix2)
 countries = [['Egypt', 'USA', 'India'], ['Dubai', 'America', 'Spain'], ['London', 'England', 'France']]
 countries2  = [country for sublist in countries for country in sublist if len(country) < 4]
 print(countries2) #prints USA
-'''
+
 
 #3D Matrix List
 
@@ -180,7 +180,17 @@ print(matrix[2][2]) #prints 9
 
 matrix = [[[k for k in range(3)] for j in range(3)] for i in range(3)]
 print(matrix)
+[
+[0,1,2]
+[0,1,2]
+[0,1,2]],
+[
+[0,1,2]
+[0,1,2]
+[0,1,2]],
+[
+[0,1,2]
+[0,1,2]
+[0,1,2]],
 
-[0,1,2]
-[0,1,2]
-[0,1,2]
+'''
