@@ -148,3 +148,39 @@ countries = [['Egypt', 'USA', 'India'], ['Dubai', 'America', 'Spain'], ['London'
 countries2  = [country for sublist in countries for country in sublist if len(country) < 4]
 print(countries2) #prints USA
 '''
+
+#3D Matrix List
+
+school = [[
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+],
+[
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+],
+[
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]]
+
+#converts to a 2D matrix
+matrix = []
+
+for submatrix in school:
+    for row in submatrix:
+        matrix.append(row)
+
+print(matrix)
+print(matrix[2][2]) #prints 9
+
+
+matrix = [[[k for k in range(3)] for j in range(3)] for i in range(3)]
+print(matrix)
+
+[0,1,2]
+[0,1,2]
+[0,1,2]
