@@ -126,6 +126,28 @@ for i in range(5):
 
 print(a)
 
+#Ex2.1
+
+for num in range(5, 9):
+    for i in range(2, num):
+        if num % i == 1:
+            print(num)
+            break
+
+prints:
+5
+6
+7
+8
+
+#Ex2.2
+i = 5
+while True:
+    if i%0o11 == 0:
+        break
+    print(i)
+    i += 1
+
 #Ex3
 #creating a 4x4 matrix
 matrix = [[j for j in range(4)] for i in range(4)]
@@ -194,3 +216,11 @@ print(matrix)
 [0,1,2]],
 
 '''
+
+
+i = 5
+while True:
+    if i % 0o11 == 0:
+        break
+    print(i)
+    i += 1
