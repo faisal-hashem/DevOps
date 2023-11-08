@@ -1,0 +1,119 @@
+Deployment on K8s cluster using Jenkins CICD
+
+Pre-Reqs: GIT, Jenkins, Docker, Docker Hub, Ansible, Kubernetes
+
+3 Ubuntu Servers::
+
+- Jenkins Server
+- Ansible Server
+- Webapp (k8s cluster w. Docker & Minikube)
+
+Architecture: 
+
+Developer --commits--> Github --webhook--> Jenkins/Docker ---> Ansible --push image--> DockerHub
+
+Also from Ansible --> Kubernetes Cluster (Cluster will get image from the Docker Hub)
+
+
+1. Jenkins Server
+
+sudo apt install openjdk-11-jdk -y
+sudo apt update
+sudo apt upgrade -y
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key 
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+sudo nano /lib/systemd/system/jenkins.service
+    Edit port to listen on port 8081
+sudo systemctl daemon-reload
+sudo sytemctl restart jenkins
+
+Go to IP:8081 and enter the Admin Password (from /var/lib/jenkins/secrets/initialAdminPassword)
+    - Install suggested Plugins
+    - Create username and password. -u jenkinsadmin -p jenkinsadmin
+    - Go to manage jenkins, manage Plugins - install SSH - Agent plugin and restart jenkins
+    
+2. Ansible Server 
+
+ssh into ansible server and create the following ansible.sh script to install ansible: 
+
+sudo -i
+nano ansible.sh
+
+sudo apt-add-repository ppa:ansible/ansible -y
+sudo apt update -y
+sudo apt install ansible -y
+
+sh ansible.sh 
+
+3. Kubernetes Cluster
+
+ssh into this server now
+
+Create 2 shell scripts: docker.sh and minikube.sh
+
+docker.sh
+    #!/bin/bash
+    sudo apt update -y
+
+    sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" -y
+
+    sudo apt update -y
+
+    apt-cache policy docker-ce -y
+
+    sudo apt install docker-ce -y
+
+    #sudo systemctl status docker
+
+    sudo chmod 777 /var/run/docker.sock
+
+make sure to restart docker service afterwards. sudo systemctl restart docker
+
+
+minikube.sh 
+    #!/bin/bash
+
+
+    sudo apt-get update -y
+
+    sudo apt-get install curl wget apt-transport-https virtualbox virtualbox-ext-pack -y
+
+    echo "1st install docker"
+
+    sudo apt update && apt -y install docker.io
+
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo chmod 666 /var/run/docker.sock
+
+    echo "Apply updates"
+    sudo apt update -y 
+    sudo apt upgrade -y
+
+    echo " Download Minikube Binary"
+    wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    sudo cp minikube-linux-amd64 /usr/local/bin/minikube
+    sudo chmod +x /usr/local/bin/minikube
+    minikube version
+
+
+    echo "Install Kubectl utility"
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/
+    kubectl version -o yaml
+
+
+    echo "Start the minikube"
+    minikube start 
+    minikube status
+
+kubectl get nodes
+
+

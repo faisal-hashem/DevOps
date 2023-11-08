@@ -69,3 +69,8 @@ print(usernames_copy.items())
 usernames_copy.clear()
 print(usernames_copy.items())
 '''
+
+#Set - immutable data that cannot be changed. Unindexable
+
+list=[]
+print(list)
