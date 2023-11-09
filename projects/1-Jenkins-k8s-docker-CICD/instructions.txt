@@ -15,7 +15,7 @@ Developer --commits--> Github --webhook--> Jenkins/Docker ---> Ansible --push im
 Also from Ansible --> Kubernetes Cluster (Cluster will get image from the Docker Hub)
 
 
-1. Jenkins Server
+1. Jenkins Server (192.168.1.168 - kube-worker-2)
 
 sudo apt install openjdk-11-jdk -y
 sudo apt update
@@ -34,7 +34,7 @@ Go to IP:8081 and enter the Admin Password (from /var/lib/jenkins/secrets/initia
     - Create username and password. -u jenkinsadmin -p jenkinsadmin
     - Go to manage jenkins, manage Plugins - install SSH - Agent plugin and restart jenkins
     
-2. Ansible Server 
+2. Ansible Server (192.168.1.170 - kube-worker-2)
 
 ssh into ansible server and create the following ansible.sh script to install ansible: 
 
@@ -47,7 +47,7 @@ sudo apt install ansible -y
 
 sh ansible.sh 
 
-3. Kubernetes Cluster
+3. Kubernetes Cluster (192.168.1.169 - kube-master-1)
 
 ssh into this server now
 
