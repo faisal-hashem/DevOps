@@ -1,0 +1,17 @@
+GPG (GNU Privacy Guard) keys in Ubuntu and other Debian-based distributions are used for two main purposes related to APT package management:
+
+Authenticating Repositories:
+GPG keys are used to sign the repositories and the Release files. This ensures that the packages you are downloading and installing on your system are from a trusted source and have not been tampered with.
+
+Signing Packages:
+Individual packages are also signed with GPG keys to verify their integrity.
+
+Storage of GPG Keys:
+The trusted keys that APT uses for repository authentication are stored in /etc/apt/trusted.gpg and /etc/apt/trusted.gpg.d/. The .gpg files in these directories contain the public keys used by APT to verify signed repositories and packages.
+
+Checking GPG Keys:
+When APT updates its package lists (via sudo apt update), it retrieves the Release files and their signatures from the repositories. APT then uses the stored public keys to verify that the signature is correct, which confirms that the repository metadata has not been tampered with.
+
+Adding GPG Keys:
+When you add a new third-party repository, you often need to import its GPG key so that APT can verify the packages from that repository. This can be done by placing the key files in the /etc/apt/trusted.gpg.d/ directory or place key files in /usr/share/keyrings/ and reference them directly in the source list entries for third-party repositories.
+

@@ -217,10 +217,13 @@ print(matrix)
 
 '''
 
+vars = [1, 2, 3]
 
-i = 5
-while True:
-    if i % 0o11 == 0:
-        break
-    print(i)
-    i += 1
+
+def test_func():
+    for i in vars:
+        if i <= 3:
+            return i
+
+
+print(test_func())

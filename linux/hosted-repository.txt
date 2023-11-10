@@ -1,0 +1,105 @@
+This will cover setting up a azure storage account as a repository to host your debian packages. 
+
+Download and store your debian package in the following:
+
+sudo apt-get install dpkg-dev 
+mkdir -p /tmp/myrepo/pool/main
+mkdir -p /tmp/myrepo/dists/rubrik/main/binary-amd64/
+
+mv applcation-file.deb /tmp/myrepo/pool/main
+
+#Create package file for debian
+cd /myrepo/ #level where you can see dists and pool 
+dpkg-scanpackages pool/main/ /dev/null | gzip -9c > dists/rubrik/main/binary-amd64/Packages.gz
+
+
+#Create Release File and GPG Key 
+sudo apt-get install gnupg
+gpg --full-generate-key
+#Added a 4096bit key with bossaccount passphrase
+
+gpg --list-keys
+gpg --list-secret-keys
+gpg --export -a "ga-gpg-main-key" > my-public-key.asc
+gpg --export-secret-keys -a "ga-gpg-linux" > my-private-key.asc
+
+#Create release.gpg 
+cd /home/username/myrepo/dists/
+cat > Release << EOF
+Origin: General Atlantic
+Label: GA Repository
+Suite: stable
+Codename: rubrik
+Version: 1.0
+Architectures: amd64
+Components: main
+Description: Rubrik Debian Package Repository
+EOF
+
+#Unzip Packages.gz file and retrieve the checksums of the package to include in the Release file
+gunzip Packages.gz 
+cat ./Packages
+
+#Add checksums for package to the Release file:
+echo 'MD5sum:' >> Release
+md5sum ./main/binary-amd64/Packages >> Release
+echo 'SHA1:' >> Release
+sha1sum ./main/binary-amd64/Packages >> Release
+echo 'SHA256:' >> Release
+sha256sum ./main/binary-amd64/Packages >> Release
+
+#Sign the Release file with GPG:
+gpg --default-key "ga-gpg-linux" --output Release.gpg --detach-sign Release
+gpg --default-key "ga-gpg-linux" --armor --detach-sign --output Release.gpg Release
+
+#Upload to Storage account
+az storage blob upload-batch -d artifacts --account-name azartifacttestrepo -s /home/bossaccount/Rubrik/myrepo --account-key KdFZ/AiZQRqdzwryHbtBf0Ibla7R76vgQ2xi9Vr3Aiklb+5CC4DhM0dg+5l/uUcsX0B/lrfpZvUF+AStQ7/z/g==
+
+#Remove the previously created files in storage account and re-run storage account upload with the Release and Release.gpg file this time
+#Run following commands:
+
+curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/ga.gpg > /dev/null
+
+#Add this to /etc/apt/sources.list.d/myrepo.list 
+deb [arch=amd64 signed-by=/usr/share/keyrings/rubrik-ga.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
+
+
+
+#Add to sources.list.d 
+sudo nano /etc/apt/sources.list.d/myrepo.list
+
+    #Without GPG
+    deb [trusted=yes] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
+
+    #With GPG
+    curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/ga-key.gpg > /dev/null
+
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ga-key.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main" | sudo tee /etc/apt/sources.list.d/my-repo.list
+
+
+#Validate updates are being pulled from the repository 
+sudo apt update 
+
+
+
+
+
+
+
+Package: rubrik-agent
+Version: 5.3.0.DA1.a670e68efbe123854039d4f1780f1eaf-2
+Architecture: amd64
+Maintainer: root <root@cloudnative-korgworker-cloud-native-create-rba-installers-fffx6>
+Installed-Size: 175652
+Depends: libc6 (>= 2.9), zlib1g (>= 1:1.1.4)
+Filename: pool/main/rubrik-agent.x86_64.deb
+Size: 64927320
+MD5sum: 16a1025e14da0d417613c7bc457e0035
+SHA1: b1760cf69705f5da90c4c18eb94d58fc3b281a03
+SHA256: 3072dcdb1470a4bb825683d1e3d8a7e4150afae5e36c65df0ca78db3c27efcf0
+Section: alien
+Priority: extra
+Description: Rubrik Backup Agent
+ Rubrik Backup Agent.
+ .
+ (Converted from a rpm package by alien version 8.95.)

@@ -1,0 +1,44 @@
+APT (Advanced Package Tools) is the package management system used by Ubuntu and other Debian-based Linux distributions. It automates the process of installing, upgrading, configuring, and removing software. 
+
+APT retrieved packages from repositories, which are servers that host software packages and metadata files that APT uses to keep track of available software packages and updates.
+
+Repositories are organized into sections by Canonical as the following:
+
+main (Canonical Official Repository):
+    It contains free and open-source software that is considered essential for the system, as well as software that Canonical has committed to supporting with security updates and bug fixes for the duration of the release's life cycle.
+    Packages in main have to comply with Ubuntu's Free Software Philosophy, and they must allow redistribution.
+
+restricted (Canonical Official Repository):
+    It includes proprietary drivers and software that are not open source but are provided to ensure that Ubuntu can work on as much hardware as possible out of the box. This might include graphics drivers, wireless card drivers, etc.
+    While the software is not freely available, Canonical ensures that it is distributable and that it will provide support and updates.
+
+universe (Community Maintained Repository - open source):
+    It contains free and open-source software that is not supported by Canonical but is allowed to be included in the distribution. The software in the universe repository is recommended by the Ubuntu community and is often widely used.
+    Security updates and bug fixes are provided by the community. While Canonical does not officially support the software, they do provide infrastructure support for the repository.
+
+multiverse (no open source - licensing restricted - not supported)
+    The multiverse repository includes software that may not be free or open source and may have licensing restrictions that limit its use. This software is not supported by Canonical and may not receive any updates at all.
+    It may contain proprietary software with restrictive licenses, software that is not free as in freedom (like some multimedia codecs), or software that can't be redistributed without permission.
+
+These repositories are in the /etc/apt/sources.list directory
+Third party repositories are in the /etc/apt/sources.list.d/* directory
+
+sudo apt update retrieves the latest LIST of updates from these repositories
+sudo apt upgrade performs the update from this LIST of updates
+
+APT has the functionality to install piece of software along with its metadata like version number, dependencies, and description
+
+Security updates are distributed through a special repository thats also in /etc/apt/sources.list file under -security. 
+
+The repositories all have a GPG key that is added to provide the authencity of the repo. 
+
+APT tools such as apt-cache , apt-get and dpkg help manage the APT eco-system
+
+
+To check current ubuntu version:
+cat /etc/os-release
+
+To perform updates on the current ubuntu version:
+sudo do-release-update 
+
+
