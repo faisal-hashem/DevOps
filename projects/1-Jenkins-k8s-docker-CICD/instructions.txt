@@ -134,5 +134,3 @@ kubectl get nodes
 6. Go to github and add the webhook, add a new webhook to your project settings and add the jenkins URL: http://192.168.1.168:8081/github-webhook/
 7. Select Content type to be json 
 8. Click on your ID on the upper right hand corner, click Configure on the left pane, Create Jenkins API token to add in the Secrets field:
-
-
