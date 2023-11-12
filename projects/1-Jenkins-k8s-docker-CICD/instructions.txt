@@ -23,7 +23,7 @@ sudo apt upgrade -y
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key 
 echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 sudo apt-get update
-sudo apt-get install jenkins
+sudo apt-get install jenkins git
 sudo nano /lib/systemd/system/jenkins.service
     Edit port to listen on port 8081
 sudo systemctl daemon-reload
@@ -115,5 +115,24 @@ minikube.sh
     minikube status
 
 kubectl get nodes
+
+
+#Post Server creation
+
+1. Create the Dockerfile and push to Github repo. We will create a jenkins pipeline to pull the Dockerfile for our CI/CD.
+2. In the Jenkins server, create a pipeline, and use the pipeline editor to add a git repo that points to your repo and make sure branch is set to main
+3. It should look something like the following to perform a git checkout:
+    node {
+    
+    stage('Git checkout'){
+        git branch: 'main', url: 'https://github.com/faisal-hashem/DevOps.git'
+    }
+}
+
+4. Once build it successful, go to jenkins server and validate the Dockerfile is there in /var/lib/jenkins/workspace/pipeline-demo/Dockerfile
+5. Now to back to pipeline configuration and enable: GitHub hook trigger for GITScm polling
+6. Go to github and add the webhook, add a new webhook to your project settings and add the jenkins URL: http://192.168.1.168:8081/github-webhook/
+7. Select Content type to be json 
+8. Click on your ID on the upper right hand corner, click Configure on the left pane, Create Jenkins API token to add in the Secrets field:
 
 
