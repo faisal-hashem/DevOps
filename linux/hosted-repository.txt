@@ -42,11 +42,11 @@ cat ./Packages
 
 #Add checksums for package to the Release file:
 echo 'MD5sum:' >> Release
-md5sum ./main/binary-amd64/Packages >> Release
+md5sum ./main/binary-amd64/Packages.gz >> Release
 echo 'SHA1:' >> Release
-sha1sum ./main/binary-amd64/Packages >> Release
+sha1sum ./main/binary-amd64/Packages.gz >> Release
 echo 'SHA256:' >> Release
-sha256sum ./main/binary-amd64/Packages >> Release
+sha256sum ./main/binary-amd64/Packages.gz >> Release
 
 #Sign the Release file with GPG:
 gpg --default-key "ga-gpg-linux" --output Release.gpg --detach-sign Release
@@ -63,6 +63,7 @@ curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubr
 #Add this to /etc/apt/sources.list.d/myrepo.list 
 deb [arch=amd64 signed-by=/usr/share/keyrings/rubrik-ga.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
 
+deb [arch=amd64 signed-by=$HOME/Rubrik/myrepo/pgp-key.public] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
 
 
 #Add to sources.list.d 

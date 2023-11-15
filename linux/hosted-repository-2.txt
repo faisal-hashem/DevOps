@@ -1,0 +1,91 @@
+sudo -i
+cd ~/Rubrik/
+mkdir -p dists/rubrik/main/binary-amd64/
+mkdir -p pool/stable/amd64/
+cp ~/Rubrik/myrepo/pool/stable/amd64/rubrik-agent.x86_64.deb pool/stable/amd64/
+dpkg-scanpackages pool/stable/amd64/ /dev/null | gzip -9c > dists/rubrik/main/binary-amd64/Packages.gz
+
+#Create GPG key pair
+gpg --full-generate-key
+gpg --list-secret-keys --keyid-format=long
+
+/root/.gnupg/pubring.kbx
+------------------------
+sec   rsa4096/EF52D7DEC770D83F 2023-11-15 [SC]
+      094CBF6041606B50602D3C57EF52D7DEC770D83F
+uid                 [ultimate] gpg-ga
+
+cd dists/rubrik
+sudo vi Release
+
+Origin: General Atlantic
+Label: GA Repo
+Suite: stable
+Codename: rubrik
+Date: Mon, 08 Nov 2023 12:55:59 UTC
+Version: 1.0
+Architectures: amd64
+Components: main
+Description: Rubrik Debian Package Repository
+
+#Run the following to add the hash to Release file:
+
+echo 'MD5sum:' >> Release
+md5sum ./main/binary-amd64/Packages.gz >> Release
+echo 'SHA1:' >> Release
+sha1sum ./main/binary-amd64/Packages.gz >> Release
+echo 'SHA256:' >> Release
+sha256sum ./main/binary-amd64/Packages.gz >> Release
+
+#Add size to release file
+vi Release
+....
+....
+MD5sum:
+dcaf808fdb2070e446c1b2fc2001ad15 449 ./main/binary-amd64/Packages.gz
+SHA1:
+e7ea8136ff845fa70f6e7ba5841c7d95ca323bb2 449 ./main/binary-amd64/Packages.gz
+SHA256:
+8f96f7a61664cfacdd43065810916a56e19d4cd100a3d3ba02aa04ed6f1b7311 449 ./main/binary-amd64/Packages.gz
+
+
+#Sign the Release file by creating Release.gpg and InRelease
+
+gpg -ae -r rubrik-gpg-key --yes --output ./Release.gpg --detach-sign ./Release
+
+gpg -a --yes --output ./Release.gpg -u 094CBF6041606B50602D3C57EF52D7DEC770D83F --detach-sign ./Release
+gpg -a --yes --clearsign --output ./InRelease -u 094CBF6041606B50602D3C57EF52D7DEC770D83F --detach-sign ./Release
+
+gpg -abs -u 094CBF6041606B50602D3C57EF52D7DEC770D83F -o Release.gpg Release - didnt work with sudo apt update
+
+
+#Export key key to add to keyrings or trusted gpg list:
+
+gpg --armor --export 8958E94B424C2838 > rubrik-ga.gpg
+
+
+gpg --export -a 8958E94B424C2838 > rubrik-public.key
+gpg --import rubrik-public.key
+
+#Upload to Storage account:
+
+az storage blob upload-batch -d artifacts --account-name azartifacttestrepo -s ~/rubrik --account-key KdFZ/AiZQRqdzwryHbtBf0Ibla7R76vgQ2xi9Vr3Aiklb+5CC4DhM0dg+5l/uUcsX0B/lrfpZvUF+AStQ7/z/g==
+gpg --export -a "ga-gpg-main-key" > my-public-key.asc
+
+#Add gpg key to keyrings folder from Storage Account: 
+curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/gpg-ga.gpg > /dev/null
+
+
+
+#earthly article method: 
+
+gpg --armor --export gpg-ga > gpg-ga.public
+cat ./gpg-ga.public | gpg --list-packets
+
+gpg --armor --export-secret-keys gpg-ga > ./gpg-ga.private
+
+gpg -a --yes --output ./Release.gpg -u AA33E4AA420E25586A677B8D8958E94B424C2838 --detach-sign ./Release
+gpg -a --yes --clearsign --output ./InRelease -u AA33E4AA420E25586A677B8D8958E94B424C2838 --detach-sign ./Release
+
+
+echo "deb [arch=amd64 signed-by=$HOME/example/pgp-key.public] http://127.0.0.1:8000/apt-repo stable main" | sudo tee /etc/apt/sources.list.d/rubrik.list
