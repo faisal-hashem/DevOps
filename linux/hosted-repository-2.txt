@@ -74,7 +74,7 @@ gpg --export -a "ga-gpg-main-key" > my-public-key.asc
 
 #Add gpg key to keyrings folder from Storage Account: 
 curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/gpg-ga.gpg > /dev/null
-
+curl https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/gpg-ga.public | gpg --dearmor > /usr/share/keyrings/gpg-ga.gpg
 
 
 #earthly article method: 
