@@ -56,6 +56,13 @@ gpg -ae -r rubrik-gpg-key --yes --output ./Release.gpg --detach-sign ./Release
 gpg -a --yes --output ./Release.gpg -u 094CBF6041606B50602D3C57EF52D7DEC770D83F --detach-sign ./Release
 gpg -a --yes --clearsign --output ./InRelease -u 094CBF6041606B50602D3C57EF52D7DEC770D83F --detach-sign ./Release
 
+gpg --default-key 094CBF6041606B50602D3C57EF52D7DEC770D83F --detach-sign --armor --output Release.gpg Release
+gpg --default-key 094CBF6041606B50602D3C57EF52D7DEC770D83F --clearsign --output InRelease Release
+dpkg-scanpackages /usr/local/rubrik/pool | gzip -9c > /usr/local/rubrik/dists/rubrik/main/binary-amd64/Packages.gz
+
+dpkg-scanpackages pool/ /dev/null | gzip -9c > dists/rubrik/main/binary-amd64/Packages.gz
+
+
 gpg -abs -u 094CBF6041606B50602D3C57EF52D7DEC770D83F -o Release.gpg Release - didnt work with sudo apt update
 
 
