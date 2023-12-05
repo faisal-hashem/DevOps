@@ -1,14 +1,18 @@
 1. Sign up for a free-tier account
+
 2. Make sure you can access EC2, if not, either wait 24 hours OR reach out to AWS support and tell them to activate your account. 
+
 3. Go to IAM (we will not be using root USER to manage/create AWS resources).
     - Activate MFA for root user
     - Create new user. Select provide user access to the AWS console. Select 'I want to create an IAM user' and select auto-generated password and select users must create new password at next sign-in. 
     - Assign this user Administrator access policy. 
     - Save the .csv file that contains the password
     - Enable MFA for this user as well. 
+
 4. Go to AWS Billing and Cost management:
     - Under Billing Preferences, activate PDF invoices by email. 
     - Alert Preferences: add you email to get alerts. Select Recieve CloudWatch billing alerts as well. 
+
 5. Configure CloudWatch (monitoring services to monitor bills):
     - Switch region to N.Virginia: 
     - Go to Alarms and click create Alarms, Select Metric, select Billing. Click Total Estimated Charge.  Select the Metric and put a condition to get alerted for Greater than $5. 
@@ -16,9 +20,18 @@
     - Give the Alarm a name: AWSBillinAlarm. And click Create. Now you should see the alarm under All Alarms. 
     - Now go to your email and click confirm subscription. 
     - Now you will get notified if your expenses go over $5.
+
 6. Create AWS Certificate that will connect to your domain (go-daddy)
     - Go to AWS Certificate Manager and click request certificate and select Request Public Certificate. 
     - Add you FQDN - *.domain.com (If you haven't done this yet, go ahead and purchase a godaddy domain)
     - We will now create a couple of records in godaddy so AWS can register your certificate. 
     - Go to the AWS certificate you just created and grab the CNAME name and CNAME value 
     - Grab just the name portion of the CNAME name (everything left of the first period), paste that into CNAME name for godaddy DNS entry add. And for the value, just paste the CNAME value from ACM certificate and click save. The status of the certificate should change to Issued, but this may take some time if you just created the godaddy domain, but give it 24 hours to register. 
+
+7. Modify IAM user account to be able to login:
+    - Go to IAM Dashboard and you will see the URL you will use to login, bookmark that.
+    - Click Create Alias for the AWS Account - (Ex. fhadmin (Alias) https://fhadmin.signin.aws.amazon.com/console (URL))
+    - Once you click on the URL with the alias name, you will automatically be logged out from the AWS account
+    - Now go to the URL and login using the IAM user created earlier and you should already have the csv file with the auto-generated password and use that to login. You should be able to change you password after login. 
+    - You should also be prompted for MFA
+    - Outside of using Billing, you should use this account to login and use AWS. Make sure you use the N.Virginia
