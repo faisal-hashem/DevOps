@@ -101,4 +101,3 @@ sudo hostnamectl set-hostname w1
 
 #Retrieve token/cert from kubedm init step in master node
 kubeadm join --discovery-token abcdef.1234567890abcdef --discovery token-ca-cert-hash sha256:1234..cdef 1.2.3.4:6443
-
