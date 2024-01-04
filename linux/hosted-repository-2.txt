@@ -96,3 +96,7 @@ gpg -a --yes --clearsign --output ./InRelease -u AA33E4AA420E25586A677B8D8958E94
 
 
 echo "deb [arch=amd64 signed-by=$HOME/example/pgp-key.public] http://127.0.0.1:8000/apt-repo stable main" | sudo tee /etc/apt/sources.list.d/rubrik.list
+
+
+#Correct Azure Storage account repo for rubrik.list:
+deb [signed-by=/usr/share/keyrings/gpg-ga.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
