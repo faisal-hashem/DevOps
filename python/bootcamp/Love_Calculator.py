@@ -1,6 +1,6 @@
 print("The Love Calculator is calculating your score...")
-name1 = input()  # What is your name?
-name2 = input()  # What is their name?
+name1 = input("What is the first person's name?")  # What is your name?
+name2 = input("What is the second person's name?")  # What is their name?
 
 full_name = name1 + name2
 lower_name = full_name.lower()
@@ -14,8 +14,7 @@ int_truelove_num = int(truelove_num)
 # print(int_truelove_num)
 
 if int_truelove_num < 10 | int_truelove_num > 90:
-    print(f"Your score is {
-          int_truelove_num}, you go together like coke and mentos.")
+    print(f"Your score is {int_truelove_num}, you go together like coke and mentos.")
 elif 40 < int_truelove_num < 50:
     print(f"Your score is {int_truelove_num}, you are alright together.")
 else:
