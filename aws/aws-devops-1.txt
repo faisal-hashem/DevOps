@@ -1,0 +1,17 @@
+AWS Setup:
+- Security Groups:
+    Sonar SG: allow inbound from Jenkins, allow port 80 and 22 from your own IP
+    Nexus SG: allow inbound from Jenkins, allow port 8080 and 22 from your own IP
+    Jenkins SG: allow inbound from Sonar, allow port 8081 and 22 from your own IP
+- Key Pair:
+    Use same key pair for all servers
+- Instances:
+    Sonar-Server: Ubuntu 2204 image w/ t2.medium size. Paste Sonar Script from /bash/sonar-setup.sh. Place in dedicated SG
+    Nexus-Server: CentOS 9 image w/ t2.medium size. Paste Nexus Script from /bash/nexus-setup.sh. Place in dedicated SG
+    Jenkins-Server: Ubuntu 2204 image w/ t2.small size. Paste Jenkins Script from /bash/jenkins-setup.sh. Place in dedicated SG
+- SSH into all servers and verify you are able to connect
+
+Jenkins Setup:
+- Standard setup with default plugins
+- Enable Maven Integration, Github Integration plugin, Nexus Artifact Uploader, SonarQube Scanner, Slack Notifications, Build Timestamp plugins
+
