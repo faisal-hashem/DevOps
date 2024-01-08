@@ -15,3 +15,64 @@ Jenkins Setup:
 - Standard setup with default plugins
 - Enable Maven Integration, Github Integration plugin, Nexus Artifact Uploader, SonarQube Scanner, Slack Notifications, Build Timestamp plugins
 
+Nexus Setup:
+- Login using Public IP
+- Create password and Disable Anonymous access
+- Go to Repositories, add a repository, 
+    Maven2(Hosted) - Store artifacts in here. Select Maven2(hosted) and give the name vprofile-release
+    Maven2(Proxy) - This is where you will store your dependencies for the artifact. Maven will download all the dependencies from the URL: https://repo1.maven.org/maven2/
+    Maven2(Hosted) - This is for Snapshots. Select Maven2(hosted) and name is vprofile-snapshot. Select Snapshot Type of artifacts. 
+    Maven2(Group) -  This is to group all the repositories you created together into one group. 
+
+Sonar Setup:
+- Go to Public IP on the browser
+- Defaults- admin/admin, change password after Login
+
+GIT Config:
+- Run git config -l to view the configuration for your GIT on your computer
+- Run ssh-keygen to create Pub/Priv key pair to SSH into your GitHub account
+- Add SSH public key to you Github, go to settings, under SSH keys add the public key in there. 
+- Fork repository from https://github.com/hkhcoder/vprofile-project, unselect main branch only
+- Git clone to home folder in your PC from the SSH option: git@github.com:faisal-hashem/vprofile-project.git
+- You can test out git push is working by making a change to the Readme file in the ci-jenkins branch and run a git add, git commit and git push origin to make sure your changes are syncing
+
+Configure Tools in Jenkins:
+- We will add JDK8 and JDK11 to the tools. Name it OracleJDK8 and OracleJDK11, do NOT select the Install automaticaly option as it has issues. 
+- SSH into Jenkins and install JDK8 as we already have JDK11 installed from the script.
+- sudo apt update && sudo apt install openjdk-8-jdk 
+- JDK8 path: /usr/lib/jvm/java-1.8.0-openjdk-amd64
+- JDK11 path: /usr/lib/jvm/java-1.11.0-openjdk-amd64
+- Scroll down to Maven and click Add Maven, Name = MAVEN3 and select the version.
+
+Maven will need to be able to authenticate with Nexus as it will need to download dependencies from there. 
+- We now need to go to Credentials in Jenkins, click on global credentials, click New Credentials.
+- Add your Nexus credentials here, the one you use to login to Nexus with. 
+- ID and Description will be nexuslogin, will be mentioned in the pipeline.
+
+JenkinFile: In the github repository, grab the JenkinsFile and erase everything in it.
+- In here you will specify the tools section to point to MAVEN3 and OracleJDK8
+- Under stages you will use the build stage to point to the settings.xml file.
+- This file will contain information on the 4 repositories you created in nexus and also mirror the main group repository.
+- In the pom.xml file, this will contain information on the main group repository as well.
+- All the variables will be specified in the JenkinsFile, thats where all of it will be passed down from.
+- Add the environment field in the jenkinsfile and add all the necessary variables. See my JenkinsFile
+- Now commit and push your code to git repository
+
+Create Jenkins job:
+- Create a new Jenkins job and select pipeline. 
+- Scroll down and select Pipeline and select Git for SCM and add your SSH address for your own Git repository for vprofile.
+- You will need to add your SSH private key here. Select Kind - SSH Username and private key. ID/Description = githublogin. Username = git
+- Add you private key that you created on your local machine. 
+- You will still see the error. But we need to SSH into Jenkins and store the github identity. 
+    - In Jenkins server, switch to root and then switch to jenkins user.
+    - run: git ls-remote -h git@github.com:faisal-hashem/vprofile-project.git HEAD
+    - Now it will store the identity of github in the known_hosts file under Jenkins Server under Jenkins user.
+    - IGNORE the error message as it does not apply. 
+- Now just switch out of credentials and switch back to the github credentials. And it should work now with no error.
+- Now scroll down and update the branches specifier to */ci-jenkins
+- Run the pipeline now and let it build. It will download the repositories and dependencies from Nexus
+- If you have any errors, make sure the variables in the pom.xml and settings.xml files have "_" instead of "-".
+- You can go to Nexus now and got Browse section, go to vpro-maven-group folder and you will all the dependencies. Its actually coming from vpro-maven-central. 
+- Everytime you make a commit from vscode to git, you will need to click build now on Jenkins. But we will automate this part soon.
+
+Github Webhook:
