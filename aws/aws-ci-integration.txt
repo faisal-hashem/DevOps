@@ -1,0 +1,197 @@
+AWS Setup (Continuous Integration):
+- Security Groups:
+    Sonar SG: allow inbound from Jenkins, allow port 80 and 22 from your own IP
+    Nexus SG: allow inbound from Jenkins, allow port 8080 and 22 from your own IP
+    Jenkins SG: allow inbound from Sonar, allow port 8081 and 22 from your own IP
+- Key Pair:
+    Use same key pair for all servers
+- Instances:
+    Sonar-Server: Ubuntu 2204 image w/ t2.medium size. Paste Sonar Script from /bash/sonar-setup.sh. Place in dedicated SG
+    Nexus-Server: CentOS 9 image w/ t2.medium size. Paste Nexus Script from /bash/nexus-setup.sh. Place in dedicated SG
+    Jenkins-Server: Ubuntu 2204 image w/ t2.small size. Paste Jenkins Script from /bash/jenkins-setup.sh. Place in dedicated SG
+- SSH into all servers and verify you are able to connect
+
+Jenkins Setup:
+- Standard setup with default plugins
+- Enable Maven Integration, Github Integration plugin, Nexus Artifact Uploader, SonarQube Scanner, Slack Notifications, Build Timestamp plugins
+
+Nexus Setup:
+- Login using Public IP
+- Create password and Disable Anonymous access
+- Go to Repositories, add a repository, 
+    Maven2(Hosted) - Store artifacts in here. Select Maven2(hosted) and give the name vprofile-release
+    Maven2(Proxy) - This is where you will store your dependencies for the artifact. Maven will download all the dependencies from the URL: https://repo1.maven.org/maven2/
+    Maven2(Hosted) - This is for Snapshots. Select Maven2(hosted) and name is vprofile-snapshot. Select Snapshot Type of artifacts. 
+    Maven2(Group) -  This is to group all the repositories you created together into one group. 
+
+Sonar Setup:
+- Go to Public IP on the browser
+- Defaults- admin/admin, change password after Login
+
+GIT Config:
+- Run git config -l to view the configuration for your GIT on your computer
+- Run ssh-keygen to create Pub/Priv key pair to SSH into your GitHub account
+- Add SSH public key to you Github, go to settings, under SSH keys add the public key in there. 
+- Fork repository from https://github.com/hkhcoder/vprofile-project, unselect main branch only
+- Git clone to home folder in your PC from the SSH option: git@github.com:faisal-hashem/vprofile-project.git
+- You can test out git push is working by making a change to the Readme file in the ci-jenkins branch and run a git add, git commit and git push origin to make sure your changes are syncing
+
+Configure Tools in Jenkins:
+- We will add JDK8 and JDK11 to the tools. Name it OracleJDK8 and OracleJDK11, do NOT select the Install automaticaly option as it has issues. 
+- SSH into Jenkins and install JDK8 as we already have JDK11 installed from the script.
+- sudo apt update && sudo apt install openjdk-8-jdk 
+- JDK8 path: /usr/lib/jvm/java-1.8.0-openjdk-amd64
+- JDK11 path: /usr/lib/jvm/java-1.11.0-openjdk-amd64
+- Scroll down to Maven and click Add Maven, Name = MAVEN3 and select the version.
+
+Maven will need to be able to authenticate with Nexus as it will need to download dependencies from there. 
+- We now need to go to Credentials in Jenkins, click on global credentials, click New Credentials.
+- Add your Nexus credentials here, the one you use to login to Nexus with. 
+- ID and Description will be nexuslogin, will be mentioned in the pipeline.
+
+JenkinFile: In the github repository, grab the JenkinsFile and erase everything in it.
+- In here you will specify the tools section to point to MAVEN3 and OracleJDK8
+- Under stages you will use the build stage to point to the settings.xml file.
+- This file will contain information on the 4 repositories you created in nexus and also mirror the main group repository.
+- In the pom.xml file, this will contain information on the main group repository as well.
+- All the variables will be specified in the JenkinsFile, thats where all of it will be passed down from.
+- Add the environment field in the jenkinsfile and add all the necessary variables. See my JenkinsFile
+- Now commit and push your code to git repository
+
+Create Jenkins job:
+- Create a new Jenkins job and select pipeline. 
+- Scroll down and select Pipeline and select Git for SCM and add your SSH address for your own Git repository for vprofile.
+- You will need to add your SSH private key here. Select Kind - SSH Username and private key. ID/Description = githublogin. Username = git
+- Add you private key that you created on your local machine. 
+- You will still see the error. But we need to SSH into Jenkins and store the github identity. 
+    - In Jenkins server, switch to root and then switch to jenkins user.
+    - run: git ls-remote -h git@github.com:faisal-hashem/vprofile-project.git HEAD
+    - Now it will store the identity of github in the known_hosts file under Jenkins Server under Jenkins user.
+    - IGNORE the error message as it does not apply. 
+- Now just switch out of credentials and switch back to the github credentials. And it should work now with no error.
+- Now scroll down and update the branches specifier to */ci-jenkins
+- Run the pipeline now and let it build. It will download the repositories and dependencies from Nexus
+- If you have any errors, make sure the variables in the pom.xml and settings.xml files have "_" instead of "-".
+- You can go to Nexus now and got Browse section, go to vpro-maven-group folder and you will all the dependencies. Its actually coming from vpro-maven-central. 
+- Everytime you make a commit from vscode to git, you will need to click build now on Jenkins. But we will automate this part soon.
+
+Github Webhook:
+- This is how we will auto run your git commits to your jenkins. 
+- Enter your public IP http://3.143.115.160:8080/github-webhook/ to your repo/settings in Github. In real life, you would use elastic IP and Load Balancer
+- Select the push event (default). Go to the webhook and view Recent deliveries. If you see the check mark, that means you are good. 
+- Go to Jenkins, open the pipeline you created earlier. Click on the Build Triggers tab, select Github Hook trigger for GITScm polling. 
+- Now make a change on your code. We will add a post into the stage build. Uses the archiveartifact plugin to archive anything that ends with .war. 
+- ex:             post {
+                echo "Now Archiving."
+                archiveArtifacts artifacts: '**/*.war'
+            }
+
+- We will also add unit testing and analysis to the Jenkins file. See end result in Github repo for more details.
+- This should auto trigger the pipeline and download the dependencies. 
+
+
+SonarQube setup:
+- Jenkins should be able to upload to SonarQube server automatically. 
+- Go to SonarQube Scanner and add it. Name it 'sonarscanner' and pick 4.7.0 as the version.
+- Go to configure system and go to sonarqube servers. Add the private IP of the sonar server, select Env variable. You need to generate and store the token in jenkins.  
+- In Sonarqube, go to Administrator settings, security, and click Generate Token. 03876932c7923048b678f3abd177f6e94871296d
+- After you add it, you wont be able to see it right away on the Jenkins screen. Save the config you have done already and exit out of the screen and go back into it again.
+- Now paste the secret into it and name it sonartoken. Make sure to select the token you added under SonarQube. 
+- Now we will write the code that will upload all the reports to SonarQube server.  
+- go to https://docs.sonarsource.com/sonarqube/9.8/analyzing-source-code/scanners/jenkins-extension-sonarqube/ 
+- You will first need to add the environment variables to your JenkinsFile. 
+        SONARSERVER = 'sonarserver'
+        SONARSCANNER = 'sonarscanner'
+
+- Add this stage to your JenkinsFile: 
+            stage ('Solar Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}"
+            }
+            steps {
+                withSonarQubeEnv("${SONARSERVER}") {
+                    sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+                    -Dsonar.projectName=vprofile-repo \
+                    -Dsonar.projectVersion=1.0 \
+                    -Dsonar.sources=src/ \
+                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+                }
+            }
+        }
+- Now commit the code and it will trigger your pipeline to run. You should be able to browse to Sonarqube and view the vprofile-repo and see all the bugs and vulnerabilities it has
+
+Quality Gates:
+- In Sonarqube, you can view the current quality gates by clicking on the tab Quality Gates.
+- We will attempt to create our own Quality Gates
+- Click Create in that same window in Sonarqube. Put Bugs > 25, so we can see how the job will fail. 
+- Now you need to attach the quality gate to the project. Go to project settings, quality gates and select the one you just created.
+- So now this quality gate update won't have any effect on the jenkins build or we wont be able to see if the build will fail since there is no connectivity to Jenkins
+- In this case, we will need to create a webhook to Jenkins from the Project Settings.
+- Click create on the webhook, add a name and the private IP of the Jenkins server like this: http://172.31.20.241:8080/sonarqube-webhook
+- Now we need to modify the JenkinsFile to wait for the quality gate.
+    timeout(time: 10, unit: 'MINUTES') {
+        waitForQualityGate abortPipeline: true
+    }
+-After commit, pipeline will run. Your pipeline should fail due to Quality gate.
+- You can raise the quality gate from 25 to 100 and re-run the pipeline. Should be successful. 
+
+Upload Artifact to Nexus Repo:
+- The artifact that gets uploaded to nexus repo during every build needs to have a build timestamp on the name
+- In Jenkins, configure build timestamp (We already configured the plugin for this)
+- Go to Manager Jenkins, Configure System, Under Build Timestamp. Add the pattern: yy-MM-dd_HHmm
+- Nexus Artifact Uploader is the name of the plugin - Jenkins. Will be using this, so you can grab the code from the Jenkins page for this.
+- Need to add the following stage to your JenkinsFile:
+    stage ("UploadArtifact") {
+            steps{
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                    groupId: 'QA',
+                    version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+                    repository: "${RELEASE_REPO}",
+                    credentialsId: "${NEXUS_LOGIN}",
+                    artifacts: [
+                        [artifactId: 'vproapp',
+                        classifier: '',
+                        file: 'target/vprofile-v2.war',
+                        type: 'war']
+                    ]
+                )
+            }
+        } 
+- Now when you commit your code, the build pipeline will run again and you should see in Nexus the new artifact file under the vprofile-release folder.
+- Now the OPS team can take this artifact and deploy to a server.
+
+Slack Notifications:
+- Create a slack account using google account
+- Create a workspace and a channel called ci/cd.
+- Now we will add a app to slack for Jenkins to connect Slack to Jenkins. 
+- In Apps, search for Jenkins CI and choose a channel to connect to Jenkins
+- Grab the token: w2vvGzcttNJ8NG7i80hppIuO, save settings. 
+- Go to Jenkins, configure system, scroll to Slack. Enter workspace name: (the team sub domain, find that in the slack-jenkins instructions), add the token as a Secret Text, paste your token here. 
+- Give the channel name: jenkinscicd
+- Now we will add it into our JenkinsFile as a post installation step. 
+- Define a color map for the post Notification before the pipeline:
+    def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+]
+
+- Add the post step at the end of the pipeline:
+        post {
+        always {
+            echo 'Slack Notifications'
+            slackSend channel: '#jenkinscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+        }
+    }
+- Now commit the code and the pipeline will run. You should get a SUCCESS notification now.
+- You can now edit the jenkinsfile to make a error and run it again to make sure you get failure notification. 
+
+
+That is all for the Continuous Integration portion. You can now shut down all the created resources in AWS.
