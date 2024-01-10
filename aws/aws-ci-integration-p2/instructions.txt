@@ -1,0 +1,39 @@
+Continuous Integration Process:
+Code should be build and test everytime there is a commit. This is CI. If there is a manual build in place, this will not be possible.
+
+Server Approach: Manual overhead and time consuming.
+Cloud Services: Set up AWS CI Pipeline. Short MTTR (Mean Time To Repair), AGILE, No OPs, No Human Intervention
+
+AWS Tools:
+- Code Commmit (Version Control System)
+- Code Artifact (Maven Repo for Dependencies)
+- Code Build (Build Sservice from AWS)
+- Code Deploy (Artifact Deloyment Service)
+
+- SonarCloud  (Sonarqube Cloud Services)
+- Checkstyle (Code Analysis from Build Job)
+- Code Pipeline (Service to Integrate all jobs together)
+
+Architecture AWS Pipeline:
+Source --> Review --> Build
+
+Source: (AWS Code Commit) --> Review: (AWS CodeBuild - Pull Dependencies from AWS CodeArtifact) <-> SonarCloud --> Build (AWS CodeBuild - Pulls Dependencies from AWS CodeArtifact) --> AWS S3 Bucket (Artifact Storage)
+
+Step 1: Code Commit Setup
+- Create CodeCommit Repo:
+    - Create Maven repository - vprofile-code-repo
+- IAM User with custom policies for CC - one to one access to CC
+    - In IAM, create user- vprofile-code-admin - Add policy and create new custom policy. Give all CodeCommit rights. 
+    - Select Specify ARN, and select Account, your region (us-east-2), repo name you created earlier.
+    - Give policy name: vprofile-repo-fullaccess
+    - Go back to previous tab, search for the newly created policy and click add. user is created now. 
+    - Create access key for this user under Security Credentials. Save the CSV file with all the info. 
+    - Make sure to have aws cli, run aws --Version
+    - run aws configure and add your access id and access key here
+- SSH auth to CodeCommit Repo from our local machine:
+    - Create a SSH key. ssh-keygen and use the name vpro-codecommit_rsa
+    - Upload public key to the AWS User we just created. 
+    - Now we will need to create a config file that basically says to use the private key when the public key is being used during authentication
+    
+- Migrate vProfile repo from Github to codecommit. Clone to our PC and then upload to CodeCommit repo
+
