@@ -34,6 +34,35 @@ Step 1: Code Commit Setup
     - Create a SSH key. ssh-keygen and use the name vpro-codecommit_rsa
     - Upload public key to the AWS User we just created. 
     - Now we will need to create a config file that basically says to use the private key when the public key is being used during authentication
-    
+    - in .ssh directory add a file called config with the following:
+        Host git-codecommit.*.amazonaws.com
+        User AKIAQMS5XWRIVdfsdfHP4 (this is your SSH key ID from AWS)
+        IdentityFile ~/.ssh/vpro-codecommit_rsa
+    - Now the private key will be used during SSH, you can test by: ssh -v git-codecommit.us-east-2.amazonaws.com 
+    - Make sure the connection is successful. If not, re-create the ssh key pair and re-upload and make sure there is no extra spaces.
+
+
+
 - Migrate vProfile repo from Github to codecommit. Clone to our PC and then upload to CodeCommit repo
+    - Do a git clone https://github.com/hkhcoder/vprofile-project.git
+    - cd into this
+    - run cat .git/config .. In the url remote origin, we will need to replace that to your aws code commit
+    - Before doing this, lets first go through all the branches we want to migrate to aws:
+        - git branch -a
+        - git checkout aws-ci 
+        - git checkout aws-cd 
+        - git checkout ci-jenkins
+        - git checkout docker
+    - You can also use a for loop against the entire list of git branches -a and checkout them all by running the following:
+    - git branch -a | grep remotes | grep -v HEAD | cut -d / -f3 > ./br
+    - To view each value in the for loop run this: for i in `cat ./br` ; do echo $i ; done
+    - To checkout each run this: for i in `cat ./br` ; do git checkout $i ; done
+    - now we have all the branches
+    - Now we will remove the git origin under .git
+        - git remote rm origin
+        - cat .git/config (should now be all clear)
+    - Now we will add aws code commit in here (Click clone URL on the AWS Code Commit):
+        - git remote add origin ssh://git-codecommit.us-east-2.amazonaws.com/v1/repos/vprofile-code-repo
+        - git push origin --all (This will push all the checkout branches to aws code commit, can view it there now.)
+        
 
