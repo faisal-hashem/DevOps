@@ -93,4 +93,32 @@ Step 2: Code Artifact Setup
                 - Organization: use organization key from sonar cloud
                 - HOST: https://sonarcloud.io
                 - Project: use project key from sonar cloud
-                - LOGIN: secure string - the token from sonar cloud 
+                - LOGIN: secure string - the token from sonar cloud
+    
+Step 3: Create a CodeBuild project for Sonar - good for 1 or 2 projects, not that frequent codebuild it good. But complexity Jenkins is good.
+    - We will focus on changing the code artifact location (all the way in the bottom of the file) the pom.xml file to the AWS artifcat repo (in vprofile, under ci-aws branch)
+    - Go to AWS Code Artifact maven-central-store, connect to repo and select mvn and grab the URL from step 5. 
+    - Go to Settings. xml and replace all the URLs with this one: https://mandohashdevops-027040134225.d.codeartifact.us-east-2.amazonaws.com/maven/maven-central-store/
+    - Now go to aws files folder and drag the sonar_buildspect.yml to the root directory under vprofile-project
+    - Change the name of file to buildspec.yml 
+    - Go back to the AWS connect to repo Code Artifact screen and grab the token (entire command) from Step 3.
+        export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain mandohashdevops --domain-owner 027040134225 --region us-east-2 --query authorizationToken --output text`
+    - Paste it in the buildspec.yml file, replace the previous export command.
+    - Commit the changes from the AWS repo in your VS Code and push it to the AWS repo
+    - Verify all changes are there
+    - Go to Build tab, click Get Started, Create Project. Name it vpro-code-analysis. 
+    - Source code is CodeCommit, select repo and ci-aws branch. 
+    - Environment should be Ubuntu, Standard RunTime, 5.0 Image. 
+    - AWS will create a role name for you, but remember this role wont have access to the parameter store.
+        - Need to go to this role after, codebuild51-vpro-code-analysis-service-role, and assign permissions. 
+    - By Default buildspec file is searched on the root directory, thats why we moved it there. But we can change it. 
+    - Cloudwatch Logs are essential, create a group name: vprofile-ohio-codebuild, stream name: sonarCodeAnalysis
+    - Click Create, but build will fail since it cannot access the parameter store. 
+    - Go to the build project you just created, click Edit on the Environment and copy the Service Role.
+    - Go to IAM and search for the codebuil51... role and click on the Policies side tab and click Create Policy. 
+        - Select the service, search for Systems Manager, under List select DescribeParameters. (List 1 parameter)
+        - Under Read, select DescribeDocumentParameters, GetParameter, GetParameters, GetParameterHistory, GetParametersByPath, (Read, 5 parameters)
+        - After policy is created, go back to the Role CodeBuild51.. and add permissions for the new policy you just created. 
+        - You need to add another policy to access the CodeArtifact. AWSCodeArtifactReadOnlyAccess. 
+    - Now lets run the Build job by clicking Start Build. Should take a long time and can check status under Phase Details.
+    - This will take some time, if any errors, you can check under build logs.  
