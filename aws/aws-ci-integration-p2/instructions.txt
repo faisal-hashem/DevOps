@@ -122,3 +122,20 @@ Step 3: Create a CodeBuild project for Sonar - good for 1 or 2 projects, not tha
         - You need to add another policy to access the CodeArtifact. AWSCodeArtifactReadOnlyAccess. 
     - Now lets run the Build job by clicking Start Build. Should take a long time and can check status under Phase Details.
     - This will take some time, if any errors, you can check under build logs.  
+    - Since this project is based off Java 11 which is deprecated. We will have to replace mvn sonar job line on the buildspec file with the following:
+    -    mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ -Dsonar.junit.reportsPath=target/surefire-reports/ -Dsonar.jacoco.reportsPath=target/jacoco.exec -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml -Dsonar.scanner.force-deprecated-java-version=true
+    - Once the build is successful, you should be able to see all the results in sonar cloud for the code. 
+    - This job is designed to pass due to the Quality Gate exceptions we have placed.
+
+Step 4: Build Artifact and Upload the artifact to S3 Bucket
+    - We will use the other buildspec file. 
+    - Similar to the last buildspec file. We will need to point this our AWS maven repo
+    - Lets go and grab the export command from there from the maven store instructructions or grab it from the sonar build spec file:
+        export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain mandohashdevops --domain-owner 027040134225 --region us-east-2 --query authorizationToken --output text`
+    - Everything else we can keep the same. We will use the path where the buildspec file is in
+    - This time during the AWS CodeBuild project creation, we will do everything the same as before except for:
+        - Buildspec file location, point to aws-files\build_buildspec.yml
+        - No Artifact selection, since the pipeline will push it to the s3 bucket.
+        - Group name is same as before. Stream name will different.BuildArtifact
+    - Assign the role role, AWSCodeArtifactReadOnlyAccess policy permission. 
+    - Start the build 
