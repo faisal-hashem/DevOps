@@ -139,3 +139,18 @@ Step 4: Build Artifact and Upload the artifact to S3 Bucket
         - Group name is same as before. Stream name will different.BuildArtifact
     - Assign the role role, AWSCodeArtifactReadOnlyAccess policy permission. 
     - Start the build 
+
+Step 5: Build S3 Bucket with Key, SNS messaging and AWS Pipeline
+    - Create S3 Bucket, create a key "pipeline-artifacts".
+    - Create SNS Topic, with emails going to a email address 
+    - Go to AWS Pipeline, create the pipeline, source provider will be Code Commit, select your Repo and branch. All is default. 
+    - Build provider is AWS CodeBuild, select region, select build artifact project name. 
+    - We wont select Deploy provider for now.
+    - Save it and stop the execution from happening for now.
+    - Edit the pipeline, and after the source step add a sonar code analysis step
+        - Action Provider=AWSCodeBuild, same region, input artifact= SourceArtifact. Project name: vpro-code-analysis. 
+    - Add Deploy to s3 step after Build. 
+        - Action Provider=Amazon S3, same region, Input Artifact= BuildArtifact. Select the bucket, copy the folder name as the deployment path. Select Extract file before deploy. 
+    - Now modify the pipeline settings, click Notifications, add your email address there for notifications. 
+    - Run the Pipeline
+    - Once its successful, test run a commit from VS code to make sure pipeline kicks off. 
