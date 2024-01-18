@@ -19,28 +19,33 @@ Source --> Review --> Build
 
 Source: (AWS Code Commit) --> Review: (AWS CodeBuild - Pull Dependencies from AWS CodeArtifact) <-> SonarCloud --> Build (AWS CodeBuild - Pulls Dependencies from AWS CodeArtifact) --> AWS S3 Bucket (Artifact Storage)
 
-Step 1: Code Commit Setup
+Step 1: Code Commit Setup: CC Repository, IAM User w/Policies, SSH Auth from local machine, Copy code to CC Repo, Test pushing to CC repo.
+
 - Create CodeCommit Repo:
     - Create Maven repository - vprofile-code-repo
+
 - IAM User with custom policies for CC - one to one access to CC
-    - In IAM, create user- vprofile-code-admin - Add policy and create new custom policy. Give all CodeCommit rights. 
-    - Select Specify ARN, and select Account, your region (us-east-2), repo name you created earlier.
-    - Give policy name: vprofile-repo-fullaccess
-    - Go back to previous tab, search for the newly created policy and click add. user is created now. 
-    - Create access key for this user under Security Credentials. Save the CSV file with all the info. 
-    - Make sure to have aws cli, run aws --Version
-    - run aws configure and add your access id and access key here
+    - Create IAM User, Policy for CC, Give Rights for this Policy to use Specific Repo, Attach Policy to User:
+        - In IAM, create user- vprofile-code-admin - Add policy and create new custom policy. Give all CodeCommit rights. 
+        - Within the CodeCommit policy screen, you will need to select the CodeCommit repository to point to by ARN. 
+        - Select Specify ARN, and select This Account, your region (us-east-2), repo name you created earlier.
+        - Give policy name: vprofile-repo-fullaccess
+        - Go back to previous tab, search for the newly created policy and click add. user is created now. 
+    - Create Access Key, login to AWS CLI w/ Access ID/Key:
+        - Create access key for this user under Security Credentials. Save the CSV file with all the info. 
+        - Make sure to have aws cli, run aws --Version
+        - run aws configure and add your access id and access key here
+
 - SSH auth to CodeCommit Repo from our local machine:
-    - Create a SSH key. ssh-keygen and use the name vpro-codecommit_rsa
-    - Upload public key to the AWS User we just created. 
-    - Now we will need to create a config file that basically says to use the private key when the public key is being used during authentication
+    - Create a SSH key on your local machine. ssh-keygen and use the name vpro-codecommit_rsa
+    - Upload public key to the IAM AWS User we just created. 
+    - Create a config file on local machine for the private key to recognize the public key during authentication
     - in .ssh directory add a file called config with the following:
         Host git-codecommit.*.amazonaws.com
-        User AKIAQMS5XWRIVdfsdfHP4 (this is your SSH key ID from AWS)
-        IdentityFile ~/.ssh/vpro-codecommit_rsa
+        User Enter-Your-Access-Key-Here (this is your SSH key ID from AWS)
+        IdentityFile ~/.ssh/vpro-codecommit_rsa  #point to public key
     - Now the private key will be used during SSH, you can test by: ssh -v git-codecommit.us-east-2.amazonaws.com 
     - Make sure the connection is successful. If not, re-create the ssh key pair and re-upload and make sure there is no extra spaces.
-
 
 
 - Migrate vProfile repo from Github to codecommit. Clone to our PC and then upload to CodeCommit repo
@@ -53,15 +58,19 @@ Step 1: Code Commit Setup
         - git checkout aws-cd 
         - git checkout ci-jenkins
         - git checkout docker
+        - etc.
+
     - You can also use a for loop against the entire list of git branches -a and checkout them all by running the following:
-    - git branch -a | grep remotes | grep -v HEAD | cut -d / -f3 > ./br
-    - To view each value in the for loop run this: for i in `cat ./br` ; do echo $i ; done
-    - To checkout each run this: for i in `cat ./br` ; do git checkout $i ; done
-    - now we have all the branches
-    - Now we will remove the git origin under .git
+        - git branch -a | grep remotes | grep -v HEAD | cut -d / -f3 > ./br
+        - To view each value in the for loop run this: for i in `cat ./br` ; do echo $i ; done
+        - To checkout each run this: for i in `cat ./br` ; do git checkout $i ; done
+        - We have checked out all the branches
+
+    - Remove the git origin under .git on local machine
         - git remote rm origin
         - cat .git/config (should now be all clear)
-    - Now we will add aws code commit in here (Click clone URL on the AWS Code Commit):
+
+    - Now we will add AWS code commit in here (Click clone URL on the AWS Code Commit):
         - git remote add origin ssh://git-codecommit.us-east-2.amazonaws.com/v1/repos/vprofile-code-repo
         - git push origin --all (This will push all the checkout branches to aws code commit, can view it there now.)
         
@@ -71,7 +80,7 @@ Step 2: Code Artifact Setup
     process. 
         - Connect the AWS Code Artifact to Maven store
         - Create Domain Name for this Account - mandohashdevops
-        - After createdd,  you shoukld see 2 repos under the artifact. We will point to the maven central store repo.
+        - After created, you shoukld see 2 repos under the artifact. We will point to the maven central store repo.
         - Click on View connection instructructions. We will PULL, mvn, Review Step 3-6. We will need to open VS code and go to vprofile-project.
         - Browse to the ci-aws branch and under aws-files, open sonar_buildspec.yml. We will run these commands through the buildspec file.
         - Before running, lets review the pom.xml file and the settings.xml file.  
