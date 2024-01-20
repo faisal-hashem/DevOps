@@ -25,6 +25,7 @@ import random
 #   while play_decision == 'y':
 
 print(logo)
+
 cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
 your_card1 = random.choice(cards)
@@ -35,23 +36,27 @@ com_card1 = random.choice(cards)
 com_card2 = random.choice(cards)
 com_draw_card = random.choice(cards)
 
+sum = 0
+
+
 print(f"Your cards: [{your_card1}, {your_card2}]")
 print(f"Computer's first card: {com_card1}")
 draw_again_ans = input("Type 'y' to get another card, type 'n' to pass: ")
 
 
-def winner():
-    your_total = your_card1 + your_card2
-    com_total = com_card1 + com_card2
-    if your_total < 16:
-        print("The total is below 16, you need to draw again.")
 
-    elif your_total > com_total:
-        "You Win"
-    else:
-        "You Lost"
+# def winner():
+#     your_total = your_card1 + your_card2
+#     com_total = com_card1 + com_card2
+#     if your_total < 16:
+#         print("The total is below 16, you need to draw again.")
+
+#     elif your_total > com_total:
+#         "You Win"
+#     else:
+#         "You Lost"
 
 
-if draw_again_ans == 'n':
-    print(f"Your final hand: [{your_card1}, {your_card2}]")
-    print(f"Computer's final hand: [{com_card1}, {com_card2}]")
+# if draw_again_ans == 'n':
+#     print(f"Your final hand: [{your_card1}, {your_card2}]")
+#     print(f"Computer's final hand: [{com_card1}, {com_card2}]")
