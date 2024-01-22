@@ -109,66 +109,61 @@ Step 2: Code Artifact Setup: Create Artifact Repository, Configure Sonar Cloud t
             - Project: use project key from sonar cloud
             - LOGIN: secure string - the token from sonar cloud
     
-Step 3: Create a CodeBuild project for Sonar - good for 1 or 2 projects, not that frequent codebuild it good. But complexity Jenkins is good.
-    - We will focus on changing the code artifact location 
-        - (all the way in the bottom of the file) the pom.xml file to the AWS artifcat repo (in vprofile, under ci-aws branch)
-    - Go to AWS Code Artifact maven-central-store, connect to repo and select mvn and grab the URL from step 5. 
-    - Go to Settings. xml
-        - Replace all the URLs with this one: https://mandohashdevops-027040134225.d.codeartifact.us-east-2.amazonaws.com/maven/maven-central-store/
-    - Now go to aws files folder and drag the sonar_buildspec.yml to the root directory under vprofile-project
-    - Change the name of file to buildspec.yml 
-    - Go back to the AWS, connect to repo Code Artifact screen and grab the token (entire command) from Step 3.
-        export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain mandohashdevops --domain-owner 027040134225 --region us-east-2 --query authorizationToken --output text`
-    - Paste it in the buildspec.yml file, replace the previous export command.
-    - Commit the changes from the AWS repo in your VS Code and push it to the AWS repo
-    - Verify all changes are there
-    - Go to Build tab, click Get Started, Create Project. Name it vpro-code-analysis. 
-    - Source code is CodeCommit, select repo and ci-aws branch. 
-    - Environment should be Ubuntu, Standard RunTime, 5.0 Image. 
-    
-    - AWS will create a role name for you, but remember this role wont have access to the parameter store.
-        - Need to go to this role after, codebuild51-vpro-code-analysis-service-role, and assign permissions. 
-    - By Default buildspec file is searched on the root directory, thats why we moved it there. But we can change it. 
-    - Cloudwatch Logs are essential, create a group name: vprofile-ohio-codebuild, stream name: sonarCodeAnalysis
-    - Click Create, but build will fail since it cannot access the parameter store. 
-    - Go to the build project you just created, click Edit on the Environment and copy the Service Role.
-    
-    - Go to IAM and search for the codebuil51... role and click on the Policies side tab and click Create Policy. 
-        - Select the service, search for Systems Manager, under List select DescribeParameters. (List 1 parameter)
-        - Under Read, select DescribeDocumentParameters, GetParameter, GetParameters, GetParameterHistory, GetParametersByPath, (Read, 5 parameters)
-        - After policy is created, go back to the Role CodeBuild51.. and add permissions for the new policy you just created. 
-        - You need to add another policy to access the CodeArtifact. AWSCodeArtifactReadOnlyAccess. 
-    - Now lets run the Build job by clicking Start Build. Should take a long time and can check status under Phase Details.
-    - This will take some time, if any errors, you can check under build logs.  
-    - Since this project is based off Java 11 which is deprecated. We will have to replace mvn sonar job line on the buildspec file with the following:
-    -    mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ -Dsonar.junit.reportsPath=target/surefire-reports/ -Dsonar.jacoco.reportsPath=target/jacoco.exec -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml -Dsonar.scanner.force-deprecated-java-version=true
-    - Once the build is successful, you should be able to see all the results in sonar cloud for the code. 
-    - This job is designed to pass due to the Quality Gate exceptions we have placed.
+Step 3: Create a CodeBuild project for Sonar - good for 1 or 2 projects, not that frequent codebuild is good. But complexity Jenkins is good.
+    - Update buildspec file with own Maven Artifact info:
+        - Modify Pom.xml file <artifact> (bottom of the file) location to your maven repository store URL (can find this under connection instructions Step 5) 
+        - Go to Settings. xml, replace all the <url> with the same URL. 
+        - Move the sonar_buildspec.yml to the root directory (under vprofile_) of the project and rename to buildspec.yml
+        - In AWS, grab the token (entire command) from Step 3 in the setup instructions (export CODEARTIFACT_AUTH_TOKEN=...) and replace it with old export line in the buildspec.yml file
+        - Since this project is based off Java 11 which is deprecated. We will have to replace mvn sonar job line on the buildspec file with the following:
+            - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ -Dsonar.junit.reportsPath=target/surefire-reports/ -Dsonar.jacoco.reportsPath=target/jacoco.exec -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml -Dsonar.scanner.force-deprecated-java-version=true
+        - Commit the changes from the AWS repo in your VS Code and push it to the AWS repo and Verify.
 
-Step 4: Build Artifact and Upload the artifact to S3 Bucket
-    - We will use the other buildspec file. 
-    - Similar to the last buildspec file. We will need to point this our AWS maven repo
-    - Lets go and grab the export command from there from the maven store instructructions or grab it from the sonar build spec file:
-        export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain mandohashdevops --domain-owner 027040134225 --region us-east-2 --query authorizationToken --output text`
-    - Everything else we can keep the same. We will use the path where the buildspec file is in
+    - Create and Run Code Build project for Sonar Analysis:
+        - Go to Build tab, click Get Started, Create Project. Name it vpro-code-analysis. 
+            - Source code is CodeCommit, select repo and ci-aws branch. 
+            - Environment should be Ubuntu, Standard RunTime, 5.0 Image. 
+        - Role: AWS will create a role name for you, but remember this role wont have access to the parameter store.
+            - Need to go to this role after, codebuild51-vpro-code-analysis-service-role, and assign permissions. 
+        - BuildSpec file: By Default buildspec file is searched on the root directory, thats why we moved it there. BUT we can change it. 
+        - Cloudwatch Logs: these are essential, create a group name: vprofile-ohio-codebuild, stream name: sonarCodeAnalysis
+        - Click Create, but build will fail since it cannot access the parameter store. 
+        - Go to the build project you just created, click Edit on the Environment and copy the Service Role.
+        - Go to IAM and search for the service role and click on the Policies side tab and click Create Policy. 
+            - Select the service, search for Systems Manager, 
+                - LIST select DescribeParameters. (List 1 parameter)
+                - READ select DescribeDocumentParameters, GetParameter, GetParameters, GetParameterHistory, GetParametersByPath, (Read, 5 parameters)
+                - After policy is created, go back to the Service Role and add permissions for the new policy you just created. 
+            - Add another policy to access the CodeArtifact. AWSCodeArtifactReadOnlyAccess. 
+        - Run the Build job by clicking Start Build, check build logs for any errors.
+        - Once the build is successful, you should be able to see all the results in sonar cloud for the code. 
+        - This job is designed to pass due to the Quality Gate exceptions we have placed.
+
+Step 4: Modify Buildspec file and Create build job for the main Build job
+    - We will use the other buildspec file - /aws-files/build-buildspec.yml
+    - Get the export command from the maven store instructructions or grab it from the sonar build spec file (export CODEARTIFACT_AUTH_TOKEN=...) and paste it in the file
+    - Make sure env for parameter store is commented out. We will not be using parameter store for this build.
+    - Commit the changes to AWS 
+    - We will point the Build Project directly to this location /aws-file/build-buildspec.yml
     - This time during the AWS CodeBuild project creation, we will do everything the same as before except for:
         - Buildspec file location, point to aws-files\build_buildspec.yml
         - No Artifact selection, since the pipeline will push it to the s3 bucket.
         - Group name is same as before. Stream name will different.BuildArtifact
     - Assign the role role, AWSCodeArtifactReadOnlyAccess policy permission. 
-    - Start the build 
+    - Start the build and check for any errors
 
 Step 5: Build S3 Bucket with Key, SNS messaging and AWS Pipeline
     - Create S3 Bucket, create a key "pipeline-artifacts".
     - Create SNS Topic, with emails going to a email address 
     - Go to AWS Pipeline, create the pipeline, source provider will be Code Commit, select your Repo and branch. All is default. 
-    - Build provider is AWS CodeBuild, select region, select build artifact project name. 
-    - We wont select Deploy provider for now.
-    - Save it and stop the execution from happening for now.
-    - Edit the pipeline, and after the source step add a sonar code analysis step
-        - Action Provider=AWSCodeBuild, same region, input artifact= SourceArtifact. Project name: vpro-code-analysis. 
-    - Add Deploy to s3 step after Build. 
-        - Action Provider=Amazon S3, same region, Input Artifact= BuildArtifact. Select the bucket, copy the folder name as the deployment path. Select Extract file before deploy. 
+        - The Pipeline will contain the Source Code from Repo, Build job from Sonar, Build job for main Build and output to s3 bucket
+          Source Code > Sonar Analysis Build > Build Job > Export to s3 
+        - Build provider is AWS CodeBuild, select region, select build artifact project name. 
+        - We wont select Deploy provider for now, Save it and STOP the execution from happening for now.
+        - Edit the pipeline, and After the SOURCE step add a Sonar code analysis step
+            - Action Provider=AWSCodeBuild, same region, input artifact= SourceArtifact. Project name: vpro-code-analysis. 
+        - Add Deploy to s3 step after Build. 
+            - Action Provider=Amazon S3, same region, Input Artifact= BuildArtifact. Select the bucket, copy the folder name as the deployment path. Select Extract file before deploy. 
     - Now modify the pipeline settings, click Notifications, add your email address there for notifications. 
     - Run the Pipeline
     - Once its successful, test run a commit from VS code to make sure pipeline kicks off. 
