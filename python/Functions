@@ -1,4 +1,4 @@
-Some useful math functions are the following:
+#Some useful math functions are the following:
 
 
        ceil(x) => rounds the number x up to the nearest integer
@@ -17,3 +17,7 @@ Some useful math functions are the following:
 
 
        factorial(x) => returns the factorial of a number, it only accepts positive integers. The factorial of a number is the sum of the multiplication, of all the whole numbers, from our specified number down to 1. E.x the factorial of 4 would be 4 x 3 x 2 x 1 = 24
+
+#Generate random word
+name = "".join([random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10)])
+print(name)
