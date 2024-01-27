@@ -53,5 +53,4 @@ for machine in my_machines:
         command = f'sudo systemctl status {service} | head -n 3'
         output = ssh_command(machine, username, password, command)
         print(machine)
-        # print(output)
         print(f"{bcolors.OKGREEN}{output}{bcolors.ENDC}")
