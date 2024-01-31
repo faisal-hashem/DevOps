@@ -22,3 +22,9 @@ Using the vprofile repo we cloned and added to our Github earlier, we will modif
 
 3. Jenkins plugins, store aws creds in jenkins, install docker engine in jenkins
     - Login to Jenkins
+    - Install Docker Pipeline, Cloudbees Docker Build and Publist, Amazon ECR, Pipeline: aws steps
+    - Create AWS credentials using Access keys and secrets keys
+    - Login to Jenkins, run sudo apt update && sudo apt install awscli, install Docker Engine using the instructions for Docker on Ubuntu
+    - run usermod -aG docker jenkins to add user to docker group, restart jenkins service after
+    - Go to github and make sure code under ci-jenkins look good. 
+    - Run build job on Jenkins, should be successful.
