@@ -1,41 +1,58 @@
 import random
 from data import data
 from art_logo import logo, vs
+import os
+os.system('cls' if os.name == 'nt' else 'clear')
 
 def get_random_data():
-    #Get name description
     random_data = random.choice(data)
-    return random_data
-
-compare_a = get_random_data()
-compare_a_name = compare_a["name"]
-compare_a_description = compare_a["description"]
-compare_a_country = compare_a["country"]
-compare_a_followers = compare_a["follower_count"]
-
-compare_b = get_random_data()
-compare_b_name = compare_b["name"]
-compare_b_description = compare_b["description"]
-compare_b_country = compare_b["country"]
-compare_b_followers = compare_b["follower_count"] 
-
-print(logo)
-#print name, description, country
-print(f"Compare A: {compare_a_name} , a {compare_a_description}, from {compare_a_country}.")
-print(vs)
-#print name, description, country
-print(f"Against B: {compare_b_name} , a {compare_b_description}, from {compare_b_country}.")
-choice = input("Who has more followers? Type 'A' or 'B': ")
+    name = random_data["name"]
+    description = random_data["description"]
+    country = random_data["country"]
+    followers = random_data["follower_count"]
+    return name, description, country, followers
 
 #compare     
-def compare(choice):
+def compare(choice, compare_a_followers, compare_b_followers):
     if choice == 'A':
-        compare_a_followers > compare_b_followers:
-            
-            
-# def score()   
+        if compare_a_followers > compare_b_followers:
+            return 1
+        else:
+            return 0
+    elif choice == 'B':
+        if compare_b_followers > compare_a_followers:
+            return 1
+        else:
+            return 0
+    else:
+        print("Its a draw")
 
-# print(data[0]["name"])
-# print(data[0]["country"])
-# print(data[0]["description"])
-# print(data[0]["follower_count"])
+round = 6
+score = 0
+answer = 0
+
+while round:
+    os.system('clear')
+    print(logo)
+    
+    if answer == 0 and round < 6:
+        print(f"Sorry, that's wrong. Final score: {score}")
+        break
+    elif answer == 1 and round == 1:
+        score += 1
+        print(f"You won! Your score is: {score}")
+        break
+    elif answer == 1:
+        score += 1
+        print(f"You're right! Your score: {score}") 
+      
+    a_data = get_random_data()
+    b_data = get_random_data()
+    
+    print(f"Compare A: {a_data[0]} , a {a_data[1]}, from {a_data[2]}.")
+    print(f"{a_data[3]} and {b_data[3]}")
+    print(vs)
+    print(f"Against B: {b_data[0]} , a {b_data[1]}, from {b_data[2]}.")
+    choice = input("Who has more followers? Type 'A' or 'B': ")
+    answer = compare(choice, a_data[3], b_data[3])
+    round -= 1
