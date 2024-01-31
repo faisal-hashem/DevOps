@@ -1,0 +1,24 @@
+Continious Delivery Setup: Use the Jenkins, Nexus and Sonar VM we built in CI integration p1
+
+Using the vprofile repo we cloned and added to our Github earlier, we will modify the cicd-jenkins branch
+
+1. GIT Setup, AWS VM Power On, Jenkins file creation for Staging and Prod
+    - Power on Jenkins, Nexus, and Sonar VMs in AWS
+    - Update Security groups to access your IP
+    - Update Github Repo for vprofile-project webhook in Settings, add the Public IP of Jenkins in the webhook
+    - Go to Docker branch, download zip file
+    - Do a Git Clone of the vprofile-project, go to ci-jenkins.
+    - Create new branch git checkout -b cicd-jenkins
+    - Browse to the directory with the repo in it and copy Dockerfiles folder from Downloaded zip into the root of vprofile-project
+    - mkdir ProdPipeline StagePipeline
+    - cp Jenkinsfile from root to ProdPipeline and StagePipeline. rm Jenkinsfile from root. 
+    - Perform git add . , git commit -m "Add Jenkins files"
+    - Run git push origin cicd-jenkins 
+    - You should be able to view the git repo from original now.
+
+2. Create IAM and ECR Instance:
+    - Create user cicdjenkins, with access keys. AmazonEC2ContainerRegistryFullAccess, AmazonECS_FullAccess policies attached.
+    - In ECR, we will store docker images. Create a repository. Default settings. 
+
+3. Jenkins plugins, store aws creds in jenkins, install docker engine in jenkins
+    - Login to Jenkins
