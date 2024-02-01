@@ -12,7 +12,6 @@ def get_random_data():
     followers = random_data["follower_count"]
     return name, description, country, followers
 
-#compare     
 def compare(choice, compare_a_followers, compare_b_followers):
     if choice == 'A':
         if compare_a_followers > compare_b_followers:
@@ -24,29 +23,25 @@ def compare(choice, compare_a_followers, compare_b_followers):
             return 1
         else:
             return 0
-    else:
-        print("Its a draw")
 
-round = 6
+game_is_on = True
 score = 0
 answer = 0
+round = 0
+b_data = get_random_data()
 
-while round:
+while game_is_on:
     os.system('clear')
     print(logo)
     
-    if answer == 0 and round < 6:
-        print(f"Sorry, that's wrong. Final score: {score}")
-        break
-    elif answer == 1 and round == 1:
-        score += 1
-        print(f"You won! Your score is: {score}")
-        break
-    elif answer == 1:
+    if answer == 1:
         score += 1
         print(f"You're right! Your score: {score}") 
-      
-    a_data = get_random_data()
+    elif answer == 0 and round > 0:
+        print(f"Sorry, that's wrong. Final score: {score}")
+        break
+ 
+    a_data = b_data
     b_data = get_random_data()
     
     print(f"Compare A: {a_data[0]} , a {a_data[1]}, from {a_data[2]}.")
@@ -55,4 +50,4 @@ while round:
     print(f"Against B: {b_data[0]} , a {b_data[1]}, from {b_data[2]}.")
     choice = input("Who has more followers? Type 'A' or 'B': ")
     answer = compare(choice, a_data[3], b_data[3])
-    round -= 1
+    round += 1
