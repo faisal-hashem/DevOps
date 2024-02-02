@@ -23,8 +23,61 @@ Using the vprofile repo we cloned and added to our Github earlier, we will modif
 3. Jenkins plugins, store aws creds in jenkins, install docker engine in jenkins
     - Login to Jenkins
     - Install Docker Pipeline, Cloudbees Docker Build and Publist, Amazon ECR, Pipeline: aws steps
-    - Create AWS credentials using Access keys and secrets keys
+    - Go to Jenkins Credentials under Manage Jenkins, System, Global Creds
+    - In there, Create a AWS credentials called 'awscreds' and place your AWS Access keys and secrets keys of the cicdjenkins aws user.
     - Login to Jenkins, run sudo apt update && sudo apt install awscli, install Docker Engine using the instructions for Docker on Ubuntu
     - run usermod -aG docker jenkins to add user to docker group, restart jenkins service after
     - Go to github and make sure code under ci-jenkins look good. 
     - Run build job on Jenkins, should be successful.
+
+4. Write Jenkins Pipeline code with Dockerfile to build Docker Image and Upload to AWS ECR:
+    - In the cicd-jenkins branch, go to Dockerfiles/app/multi-stage/dockerfile - we will be using this to build the docker images. Nothing to update here
+    - In the StagePipeline/Jenkinsfile, we will add AWS ECR Environment variables, so our Jenkins Pipeline can communicate with AWS
+    - The Environment Variables will include:
+
+        registryCredential = 'ecr:us-east-2:awscreds' - this is the name of the aws
+        appRegistry = '02324343533.dkr.ecr.us-east-2.amazonaws.com/vprofileappimg' - Your AWS ECR URI
+        vprofileRegistry = "https://02324343533.dkr.ecr.us-east-2.amazonaws.com" - Your AWS ECR URL (add https and remove the vprofile path)
+
+    - In the Jenkinsfile, after the Upload Artifact stage: we will add the following stages:
+    - Create the Docker Image with the Dockerbuild file:
+
+    stage('Build App Image') {
+            steps {
+                script {
+                    dockerImage = docker.build( appRegistry+ ":$BUILD_NUMBER", "./Docker-files/app/multistage/")
+                }
+            }
+        }
+
+    - Upload Docker Image to AWS ECR:
+    
+    stage('Upload App Image') {
+            steps {
+                script {
+                    docker.withRegistry( vprofileRegistry, registryCredential ) {
+                        dockerImage.push("$BUILD_NUMBER")
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
+
+    - Commit your code to GIT and run the Pipeline build in Jenkins now.
+    - In Jenkins, Create a new Pipeline with the build trigger option (Github Hook trigger for GITscm polling)
+    - Add GIT as the source of code, enter your GIT repo info and select GIT creds from before and add branch */cicd-jenkins
+    - For Script Path, make sure to enter StagePipeline/Jenkinsfile
+    - Once build is complete, verify in AWS ECR you see the docker image. 
+
+5. Create AWS ECS 
+    - Create ECS Cluster - with Fargate, select Container Insights
+    - Go to Tasks, create Task Definition as the service will use this. 
+        - Give name: vproappstagetask, enter ECR URI and port 8080 for tomcat use. 1 CPU/2GB RAM. 
+    - Go to Services, create service that will use the task definition to create tasks/containers for us. Will create LB for us too. 
+    - Select Launch Type for Fargate to manage this. Select Manage Revision Manually. Select the Task Definition you just created.
+    - For Networking, we will create a new Security Group, add HTTP traffic from Port 80 from anywhere, we will add to this later.
+    - For Load Balancer, select Application Load Balancer, LB will listen on Port 80 and will route to port 8080 
+        - Create new Target Group, use HTTP, enter /login for the app. Place grace period as 30 seconds. 
+    - Click Create. This will take some time. In the meantime do the following: 
+    - Go to EC2, Target Groups under LB. Health Tab. And edit the exisitng one. Go to Advanced Settings and click override and add port 8080
+    - Go to Security Groups, modify the SG Inbound to accept inbound traffic on port 8080 from anywhere ipv4/ipv6. 
