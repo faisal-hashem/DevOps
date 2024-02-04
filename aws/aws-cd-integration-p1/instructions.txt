@@ -81,3 +81,29 @@ Using the vprofile repo we cloned and added to our Github earlier, we will modif
     - Click Create. This will take some time. In the meantime do the following: 
     - Go to EC2, Target Groups under LB. Health Tab. And edit the exisitng one. Go to Advanced Settings and click override and add port 8080
     - Go to Security Groups, modify the SG Inbound to accept inbound traffic on port 8080 from anywhere ipv4/ipv6. 
+
+6. Create AWS ECS Pipeline (Convert manual deployment from last step to automation via Jenkins):
+    - Update your Jenkinsfile to include variables for ECS cluster and service
+        - cluster = "vprostaging"
+        - service = "vproappstagesvc"
+    Update your Jenkinsfile to include Deploy to ECS stage in the end of the file: 
+        stage("Deploy to ECS Staging") {
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-2'){
+                    sh 'aws ecs update-service --cluster ${cluster} --service {$service} --force-new-deployment'
+                }
+            }
+        }
+
+    - Save and commit the code. 
+    - Create a prod ECS cluster following the same steps as before. 
+    - Create a prod Jenkins Pipeline using the copy method, we will be copying from the staging pipeline but update it to point to ProdPipeline and prod branch.
+    - Click Build Now on the pipeline and verify in AWS ECS a new container got created. 
+
+7. Promoting Staging to Prod:
+    - In a real life scenario, you would run all your tests and make sure everything is working on the staging pipeline
+    - Once done, you can commit the code and run the pipeline through ci/cd and if everything is verified you can merge and submit PR.
+    - Switch to the Prod branch, run git merge cicd-jenkins (our staging branch)
+    - This will open a PR request in the Github Portal and you will need to fill it out and submit it. 
+    - Once someone approves, your code can now run on prod pipeline. 
+    
