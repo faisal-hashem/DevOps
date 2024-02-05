@@ -15,7 +15,7 @@ class bcolors:
 
 
 my_machines = [
-    "10.225.128.22",
+    "10.225.128.19",
 ]
 
 services = [
