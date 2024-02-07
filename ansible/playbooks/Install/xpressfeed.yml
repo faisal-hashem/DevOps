@@ -4,7 +4,7 @@
     - name: Update and upgrade apt packages
       apt:
         update_cache: true
-        upgrade: 'yes'
+        upgrade: "yes"
 
     - name: Install required system packages
       apt:
@@ -36,7 +36,7 @@
     - name: Allow RDP connections in UFW
       ufw:
         rule: allow
-        port: '3389'
+        port: "3389"
         proto: tcp
 
     - name: Add Docker official GPG key
@@ -66,7 +66,7 @@
         url: https://github.com/docker/compose/releases/download/1.25.1-rc1/docker-compose-Linux-x86_64
         dest: /usr/local/bin/docker-compose
         mode: "u+x,g+x"
-      
+
     - name: Ensure docker and containerd services are started and enabled on boot
       service:
         name: "{{ item }}"
@@ -74,7 +74,7 @@
         enabled: true
       with_items:
         - docker
-        - containerd 
+        - containerd
 
 - name: Install-Basic-Apps
-  ansible.builtin.import_playbook: basic-apps.yml          
+  ansible.builtin.import_playbook: basic-apps.yml

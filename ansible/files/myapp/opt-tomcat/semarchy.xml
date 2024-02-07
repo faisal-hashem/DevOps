@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/myapp" useHttpOnly="true">
+    <Manager pathname="" />
+    <Resources cachingAllowed="true" cacheMaxSize="102400" />
+    <JarScanner>
+        <JarScanFilter
+                pluggabilitySkip="${tomcat.util.scan.StandardJarScanFilter.jarsToSkip},org.eclipse.equinox.servletbridge_*.jar"
+                tldSkip="${tomcat.util.scan.StandardJarScanFilter.jarsToSkip},org.eclipse.equinox.servletbridge_*.jar,com.myapp.commons.web.configuration*.jar" />
+    </JarScanner>
+
+    <!-- Additional configurations here -->
+    <Valve className="org.apache.catalina.valves.AccessLogValve"
+           directory="logs"
+           prefix="myapp_access_log."
+           suffix=".txt"
+           pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+</Context>

@@ -6,7 +6,7 @@ from azure.keyvault.secrets import SecretClient
 
 
 def get_secret_from_key_vault(secret_name):
-    key_vault_url = "https://kv-xdm-vm-dev-uc1.vault.azure.net/"
+    key_vault_url = "https://kv-myapp-vm-dev-uc1.vault.azure.net/"
     credential = ManagedIdentityCredential()
     # set AZ SecretClient vault_url/credential parameters to the set variable.
     secret_client = SecretClient(
@@ -16,7 +16,7 @@ def get_secret_from_key_vault(secret_name):
 
 
 def update_properties_file(secret_name1_value, secret_name2_value):
-    config_file_path = "/opt/tomcat/.xdm/config.properties"
+    config_file_path = "/opt/tomcat/.myapp/config.properties"
     with open(config_file_path, 'r') as file:
         filedata = file.read()
 
@@ -29,8 +29,8 @@ def update_properties_file(secret_name1_value, secret_name2_value):
 
 
 if __name__ == "__main__":
-    secret_name1 = "xdm-db-adm-password"
-    secret_name2 = "xdm-db-adm-ro-password"
+    secret_name1 = "myapp-db-adm-password"
+    secret_name2 = "myapp-db-adm-ro-password"
 
     password1 = get_secret_from_key_vault(secret_name1)
     password2 = get_secret_from_key_vault(secret_name2)

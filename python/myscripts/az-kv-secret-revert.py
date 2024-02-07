@@ -1,5 +1,5 @@
 def revert_to_placeholders():
-    config_file_path = "/opt/tomcat/.xdm/config.properties"
+    config_file_path = "/opt/tomcat/.myapp/config.properties"
 
     # Placeholder values
     placeholder1 = "DB_ADMIN_PASSWORD"
@@ -13,15 +13,15 @@ def revert_to_placeholders():
     from azure.keyvault.secrets import SecretClient
 
     def get_secret_from_key_vault(secret_name):
-        key_vault_url = "https://kv-xdm-vm-dev-uc1.vault.azure.net/"
+        key_vault_url = "https://kv-myapp-vm-dev-uc1.vault.azure.net/"
         credential = ManagedIdentityCredential()
         secret_client = SecretClient(
             vault_url=key_vault_url, credential=credential)
         retrieved_secret = secret_client.get_secret(secret_name)
         return retrieved_secret.value
 
-    current_password1 = get_secret_from_key_vault("xdm-db-adm-password")
-    current_password2 = get_secret_from_key_vault("xdm-db-adm-ro-password")
+    current_password1 = get_secret_from_key_vault("myapp-db-adm-password")
+    current_password2 = get_secret_from_key_vault("myapp-db-adm-ro-password")
 
     # Replace the current passwords back to their placeholder values
     filedata = filedata.replace(current_password1, placeholder1)

@@ -1,0 +1,6 @@
+xdm.repository.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+xdm.repository.url=jdbc:sqlserver://{{ sql_server_name }}.database.windows.net:1433;databaseName=myapp_repository
+xdm.repository.username={{ db_admin_username }}@{{ sql_server_name }}
+xdm.repository.password=DB_ADMIN_PASSWORD
+xdm.repository.readonly.username={{ db_admin_readonly_username }}@{{ sql_server_name }}
+xdm.repository.readonly.password=DB_READONLY_PASSWORD

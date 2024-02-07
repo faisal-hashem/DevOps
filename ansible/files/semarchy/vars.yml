@@ -1,7 +1,0 @@
-#sql_server_name: sql-semarchy-vm-dev-uc1
-db_admin_username: xdm_db_administrator
-db_admin_readonly_username: xdm_db_administrator_ro
-default_password: CheckMeOut123
-java_version: "17"
-tomcat_version: "9.0.80"
-#semarchy_install_zip: "semarchy-xdm-install-2023.3.0.20230609-91ff23f.zip"

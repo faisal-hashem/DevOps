@@ -1,16 +1,16 @@
 ---
-- name: semarchy-vm
+- name: myapp-vm
   hosts: all
   become: true
   vars_files:
-    - ~/ansible/files/semarchy/vars.yml
+    - ~/ansible/files/myapp/vars.yml
 
   tasks:
     - name: Update and upgrade apt packages
       apt:
         update_cache: true
-        upgrade: 'yes'
-        
+        upgrade: "yes"
+
     - name: Install openjdk JDK and JRE
       apt:
         name:
@@ -29,7 +29,7 @@
         name:
           - azure-keyvault-secrets
           - azure-identity
-        executable: pip3        
+        executable: pip3
 
     - name: Add tomcat group
       group:
@@ -48,24 +48,24 @@
       stat:
         path: /opt/tomcat
       register: tomcat_extracted
-    
+
     - name: Download Apache Tomcat
       get_url:
         url: "https://downloads.apache.org/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-      when: not tomcat_extracted.stat.exists  
+      when: not tomcat_extracted.stat.exists
 
     - name: Extract Tomcat
       unarchive:
         src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: /opt/tomcat
         remote_src: true
-        extra_opts: ['--strip-components=1']
-      when: not tomcat_extracted.stat.exists  
+        extra_opts: ["--strip-components=1"]
+      when: not tomcat_extracted.stat.exists
 
-    - name: Create /opt/tomcat/.xdm directory
+    - name: Create /opt/tomcat/.myapp directory
       file:
-        path: /opt/tomcat/.xdm
+        path: /opt/tomcat/.myapp
         state: directory
 
     - name: Set ownership for /opt/tomcat
@@ -75,126 +75,126 @@
         group: tomcat
         recurse: true
 
-    - name: Copy XDM setenv.sh
+    - name: Copy myapp setenv.sh
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat-bin/setenv.sh
+        src: ~/ansible/files/myapp/opt-tomcat-bin/setenv.sh
         dest: /opt/tomcat/bin/setenv.sh
         owner: tomcat
         group: tomcat
-        mode: '0755'
+        mode: "0755"
 
-    - name: Copy XDM tomcat-startup-wrapper.sh
+    - name: Copy myapp tomcat-startup-wrapper.sh
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat-bin/tomcat-startup-wrapper.sh
+        src: ~/ansible/files/myapp/opt-tomcat-bin/tomcat-startup-wrapper.sh
         dest: /opt/tomcat/bin/tomcat-startup-wrapper.sh
         owner: tomcat
         group: tomcat
-        mode: '0755'
+        mode: "0755"
 
     - name: Copy Tomcat Service File
       copy:
-        src: ~/ansible/files/semarchy/etc-systemd-system/tomcat.service
+        src: ~/ansible/files/myapp/etc-systemd-system/tomcat.service
         dest: /etc/systemd/system/tomcat.service
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
 
     - name: Include default variables
       include_vars:
-        file: ~/ansible/files/semarchy/vars.yml
+        file: ~/ansible/files/myapp/vars.yml
 
     - name: Override variables for DEV
       set_fact:
-        sql_server_name: "sql-xdm-vm-dev-uc1"
-        key_vault_url: "https://kv-xdm-vm-dev-uc1.vault.azure.net/"
+        sql_server_name: "sql-myapp-vm-dev-uc1"
+        key_vault_url: "https://kv-myapp-vm-dev-uc1.vault.azure.net/"
       when: env == "dev"
 
     - name: Override variables for QA
       set_fact:
-        sql_server_name: "sql-xdm-vm-qa-uc1"
-        key_vault_url: "https://kv-xdm-vm-qa-uc1.vault.azure.net/"
+        sql_server_name: "sql-myapp-vm-qa-uc1"
+        key_vault_url: "https://kv-myapp-vm-qa-uc1.vault.azure.net/"
       when: env == "qa"
 
     - name: Override variables for UAT
       set_fact:
-        sql_server_name: "sql-xdm-vm-uat-uc1"
-        key_vault_url: "https://kv-xdm-vm-uat-uc1.vault.azure.net/"
+        sql_server_name: "sql-myapp-vm-uat-uc1"
+        key_vault_url: "https://kv-myapp-vm-uat-uc1.vault.azure.net/"
       when: env == "uat"
 
     - name: Override variables for PROD
       set_fact:
-        sql_server_name: "sql-xdm-vm-prod-uc1"
-        key_vault_url: "https://kv-xdm-vm-prod-uc1.vault.azure.net/"
+        sql_server_name: "sql-myapp-vm-prod-uc1"
+        key_vault_url: "https://kv-myapp-vm-prod-uc1.vault.azure.net/"
       when: env == "prod"
 
     - name: Copy the config.properties file
       template:
-        src: ~/ansible/files/semarchy/opt-tomcat-.xdm/config.properties.j2
-        dest: /opt/tomcat/.xdm/config.properties
+        src: ~/ansible/files/myapp/opt-tomcat-.myapp/config.properties.j2
+        dest: /opt/tomcat/.myapp/config.properties
 
     - name: Copy config.properties.py script
       template:
-        src: ~/ansible/files/semarchy/opt-tomcat-bin/config.properties.py.j2
+        src: ~/ansible/files/myapp/opt-tomcat-bin/config.properties.py.j2
         dest: /opt/tomcat/bin/config.properties.py
         owner: tomcat
         group: tomcat
-        mode: '0755'
-     
+        mode: "0755"
+
     - name: Copy config.properties.revert.py
       template:
-        src: ~/ansible/files/semarchy/opt-tomcat-bin/config.properties.revert.py.j2
+        src: ~/ansible/files/myapp/opt-tomcat-bin/config.properties.revert.py.j2
         dest: /opt/tomcat/bin/config.properties.revert.py
         owner: tomcat
         group: tomcat
-        mode: '0755'
+        mode: "0755"
 
     - name: Add python3 execution line to startup.sh
       lineinfile:
         path: /opt/tomcat/bin/startup.sh
-        line: 'python3 /opt/tomcat/bin/config.properties.py'
+        line: "python3 /opt/tomcat/bin/config.properties.py"
         insertbefore: BOF
         state: present
 
-    - name: Copy XDM /conf files
+    - name: Copy myapp /conf files
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat-conf/
+        src: ~/ansible/files/myapp/opt-tomcat-conf/
         dest: /opt/tomcat/conf/
         owner: tomcat
         group: tomcat
-        mode: '0644'  
+        mode: "0644"
 
-#Copy jobs for JAR dependency files and semarchy files
-    - name: Copy XDM Semarchy .WAR file
+    #Copy jobs for JAR dependency files and myapp files
+    - name: Copy myapp myapp .WAR file
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat/semarchy.war
+        src: ~/ansible/files/myapp/opt-tomcat/myapp.war
         dest: /opt/tomcat/webapps/
         owner: tomcat
         group: tomcat
-        mode: '0644' 
+        mode: "0644"
 
-    - name: Copy XDM Semarchy .XML file
+    - name: Copy myapp myapp .XML file
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat/semarchy.xml
-        dest: /opt/tomcat/conf/Catalina/localhost/semarchy.xml
+        src: ~/ansible/files/myapp/opt-tomcat/myapp.xml
+        dest: /opt/tomcat/conf/Catalina/localhost/myapp.xml
         owner: tomcat
         group: tomcat
-        mode: '0644' 
+        mode: "0644"
 
-    - name: Copy XDM JAR dependencies
+    - name: Copy myapp JAR dependencies
       copy:
-        src: ~/ansible/files/semarchy/dependencies/
+        src: ~/ansible/files/myapp/dependencies/
         dest: /opt/tomcat/lib/
         owner: tomcat
         group: tomcat
-        mode: '0644' 
+        mode: "0644"
 
     - name: Copy context.xml for Manager Firewall Access
       copy:
-        src: ~/ansible/files/semarchy/opt-tomcat-webapps-manager-meta-inf/context.xml
+        src: ~/ansible/files/myapp/opt-tomcat-webapps-manager-meta-inf/context.xml
         dest: /opt/tomcat/webapps/manager/META-INF/context.xml
         owner: tomcat
         group: tomcat
-        mode: '0644' 
+        mode: "0644"
 
     - name: Change port 8080 to 80 in server.xml
       replace:
@@ -217,7 +217,7 @@
     - name: Set permissions for authbind file
       file:
         path: /etc/authbind/byport/80
-        mode: '0500'
+        mode: "0500"
         state: touch
 
     - name: Set owner for authbind file
@@ -230,7 +230,7 @@
       replace:
         path: /opt/tomcat/bin/startup.sh
         regexp: 'exec "\$PRGDIR"/"\$EXECUTABLE" start "\$@"'
-        replace: 'exec authbind --deep "$PRGDIR"/"$EXECUTABLE" start "$@"' 
+        replace: 'exec authbind --deep "$PRGDIR"/"$EXECUTABLE" start "$@"'
 
     - name: Start and enable Tomcat service
       systemd:

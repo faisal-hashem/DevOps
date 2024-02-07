@@ -5,7 +5,7 @@
     - name: splunk_username
       prompt: "Enter the user name for the Universal Forwarder"
       private: no
-    - name: CheckMeOut123
+    - name: PASSWORD
       prompt: "Enter the password for the Universal Forwarder"
       private: yes
 
@@ -16,7 +16,7 @@
         dest: /tmp/
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
 
     - name: Install Splunk Agent
       apt:
@@ -26,16 +26,16 @@
     - name: Allow port 9997 through UFW
       ufw:
         rule: allow
-        port: '9997'
+        port: "9997"
         proto: tcp
 
     - name: Install the Splunk app
       command:
         cmd: /opt/splunkforwarder/bin/splunk install app /tmp/splunkclouduf.spl
-        creates: /opt/splunkforwarder 
+        creates: /opt/splunkforwarder
       register: install_app_output
-      become: yes 
-      
+      become: yes
+
     - name: Check if app installation was successful
       assert:
         that:

@@ -15,12 +15,11 @@ class bcolors:
 
 
 my_machines = [
-    "10.225.128.19",
+    "ENTER_IP_HERE",
 ]
 
 services = [
     "SplunkForwarder",
-    "falcon-sensor",
     "qualys-cloud-agent",
     "rubrik",
 ]

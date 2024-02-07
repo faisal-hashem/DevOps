@@ -1,8 +1,8 @@
 Permissions
 
 Invoke-Command -ComputerName uc1p-auth01 -ScriptBlock {Get-LocalGroupMember -Name "Administrators"}
-Invoke-Command -ComputerName uc1p-ssookta01, ue2p-ssookta01 -ScriptBlock {Add-LocalGroupMember -Group "Administrators" -Member "GAP\GPO - LocalAdminGroups-NPS-Admins" -Verbose}
-Invoke-Command -ComputerName uc1p-ssookta01, ue2p-ssookta01 -ScriptBlock {Remove-LocalGroupMember -Group "Administrators" -Member "GAP\GPO - LocalAdminGroups-NPS-Admins" -Verbose}
+Invoke-Command -ComputerName uc1p-ssookta01, ue2p-ssookta01 -ScriptBlock {Add-LocalGroupMember -Group "Administrators" -Member "DOMAIN\GPO - LocalAdminGroups-NPS-Admins" -Verbose}
+Invoke-Command -ComputerName uc1p-ssookta01, ue2p-ssookta01 -ScriptBlock {Remove-LocalGroupMember -Group "Administrators" -Member "DOMAIN\GPO - LocalAdminGroups-NPS-Admins" -Verbose}
 
 
 #Add user to AD Group

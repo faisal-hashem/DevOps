@@ -20,14 +20,14 @@ gpg --full-generate-key
 
 gpg --list-keys
 gpg --list-secret-keys
-gpg --export -a "ga-gpg-main-key" > my-public-key.asc
-gpg --export-secret-keys -a "ga-gpg-linux" > my-private-key.asc
+gpg --export -a "fhcomp-gpg-main-key" > my-public-key.asc
+gpg --export-secret-keys -a "fhcomp-gpg-linux" > my-private-key.asc
 
 #Create release.gpg 
 cd /home/username/myrepo/dists/
 cat > Release << EOF
-Origin: General Atlantic
-Label: GA Repository
+Origin: fhcomp
+Label: fhcomp Repository
 Suite: stable
 Codename: rubrik
 Version: 1.0
@@ -49,8 +49,8 @@ echo 'SHA256:' >> Release
 sha256sum ./main/binary-amd64/Packages.gz >> Release
 
 #Sign the Release file with GPG:
-gpg --default-key "ga-gpg-linux" --output Release.gpg --detach-sign Release
-gpg --default-key "ga-gpg-linux" --armor --detach-sign --output Release.gpg Release
+gpg --default-key "fhcomp-gpg-linux" --output Release.gpg --detach-sign Release
+gpg --default-key "fhcomp-gpg-linux" --armor --detach-sign --output Release.gpg Release
 
 #Upload to Storage account
 az storage blob upload-batch -d artifacts --account-name azartifacttestrepo -s /home/bossaccount/Rubrik/myrepo --account-key KdFZ/AiZQRqdzwryHbtBf0Ibla7R76vgQ2xi9Vr3Aiklb+5CC4DhM0dg+5l/uUcsX0B/lrfpZvUF+AStQ7/z/g==
@@ -58,10 +58,10 @@ az storage blob upload-batch -d artifacts --account-name azartifacttestrepo -s /
 #Remove the previously created files in storage account and re-run storage account upload with the Release and Release.gpg file this time
 #Run following commands:
 
-curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/ga.gpg > /dev/null
+curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/fhcomp.gpg > /dev/null
 
 #Add this to /etc/apt/sources.list.d/myrepo.list 
-deb [arch=amd64 signed-by=/usr/share/keyrings/rubrik-ga.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
+deb [arch=amd64 signed-by=/usr/share/keyrings/rubrik-fhcomp.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
 
 deb [arch=amd64 signed-by=$HOME/Rubrik/myrepo/pgp-key.public] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
 
@@ -73,9 +73,9 @@ sudo nano /etc/apt/sources.list.d/myrepo.list
     deb [trusted=yes] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
 
     #With GPG
-    curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/ga-key.gpg > /dev/null
+    curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/fhcomp-key.gpg > /dev/null
 
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ga-key.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main" | sudo tee /etc/apt/sources.list.d/my-repo.list
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/fhcomp-key.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main" | sudo tee /etc/apt/sources.list.d/my-repo.list
 
 
 #Validate updates are being pulled from the repository 

@@ -13,13 +13,13 @@ gpg --list-secret-keys --keyid-format=long
 ------------------------
 sec   rsa4096/EF52D7DEC770D83F 2023-11-15 [SC]
       094CBF6041606B50602D3C57EF52D7DEC770D83F
-uid                 [ultimate] gpg-ga
+uid                 [ultimate] gpg-fhcomp
 
 cd dists/rubrik
 sudo vi Release
 
-Origin: General Atlantic
-Label: GA Repo
+Origin: fhcomp
+Label: fhcomp Repo
 Suite: stable
 Codename: rubrik
 Date: Mon, 08 Nov 2023 12:55:59 UTC
@@ -68,7 +68,7 @@ gpg --default-key 094CBF6041606B50602D3C57EF52D7DEC770D83F --clearsign --output 
 
 #Export key key to add to keyrings or trusted gpg list:
 
-gpg --armor --export 8958E94B424C2838 > rubrik-ga.gpg
+gpg --armor --export 8958E94B424C2838 > rubrik-fhcomp.gpg
 
 
 gpg --export -a 8958E94B424C2838 > rubrik-public.key
@@ -77,19 +77,19 @@ gpg --import rubrik-public.key
 #Upload to Storage account:
 
 az storage blob upload-batch -d artifacts --account-name azartifacttestrepo -s ~/rubrik --account-key KdFZ/AiZQRqdzwryHbtBf0Ibla7R76vgQ2xi9Vr3Aiklb+5CC4DhM0dg+5l/uUcsX0B/lrfpZvUF+AStQ7/z/g==
-gpg --export -a "ga-gpg-main-key" > my-public-key.asc
+gpg --export -a "fhcomp-gpg-main-key" > my-public-key.asc
 
 #Add gpg key to keyrings folder from Storage Account: 
-curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/gpg-ga.gpg > /dev/null
-curl https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/gpg-ga.public | gpg --dearmor > /usr/share/keyrings/gpg-ga.gpg
+curl -fsSL https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/Release.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/gpg-fhcomp.gpg > /dev/null
+curl https://azartifacttestrepo.blob.core.windows.net/artifacts/dists/rubrik/gpg-fhcomp.public | gpg --dearmor > /usr/share/keyrings/gpg-fhcomp.gpg
 
 
 #earthly article method: 
 
-gpg --armor --export gpg-ga > gpg-ga.public
-cat ./gpg-ga.public | gpg --list-packets
+gpg --armor --export gpg-fhcomp > gpg-fhcomp.public
+cat ./gpg-fhcomp.public | gpg --list-packets
 
-gpg --armor --export-secret-keys gpg-ga > ./gpg-ga.private
+gpg --armor --export-secret-keys gpg-fhcomp > ./gpg-fhcomp.private
 
 gpg -a --yes --output ./Release.gpg -u AA33E4AA420E25586A677B8D8958E94B424C2838 --detach-sign ./Release
 gpg -a --yes --clearsign --output ./InRelease -u AA33E4AA420E25586A677B8D8958E94B424C2838 --detach-sign ./Release
@@ -99,4 +99,4 @@ echo "deb [arch=amd64 signed-by=$HOME/example/pgp-key.public] http://127.0.0.1:8
 
 
 #Correct Azure Storage account repo for rubrik.list:
-deb [signed-by=/usr/share/keyrings/gpg-ga.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main
+deb [signed-by=/usr/share/keyrings/gpg-fhcomp.gpg] https://azartifacttestrepo.blob.core.windows.net/artifacts/ rubrik main

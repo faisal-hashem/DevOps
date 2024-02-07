@@ -1,0 +1,5 @@
+db_admin_username: db_administrator
+db_admin_readonly_username: db_administrator_ro
+default_password: password123
+java_version: "17"
+tomcat_version: "9.0.80"

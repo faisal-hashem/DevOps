@@ -108,22 +108,22 @@ function ASRRecovery {
     $script:PrimContainer = $PrimaryContainers[$PrimaryContainerNumber - 1]
     $script:PrimaryContainerName = $PrimaryContainers[$PrimaryContainerNumber - 1].Name
 
-    if ($PrimContainer.FabricFriendlyName -eq 'Central US'){
-        $script:PrimaryContainerMapping = $PrimContainer | select -ExpandProperty ProtectionContainerMappings | where {$_.SourceFabricFriendlyName -match "Central US"}
+    if ($PrimContainer.FabricFriendlyName -eq 'Central US') {
+        $script:PrimaryContainerMapping = $PrimContainer | select -ExpandProperty ProtectionContainerMappings | where { $_.SourceFabricFriendlyName -match "Central US" }
     }
     else {
-        $script:PrimaryContainerMapping = $PrimContainer | select -ExpandProperty ProtectionContainerMappings | where {$_.SourceFabricFriendlyName -match "East US 2"}
+        $script:PrimaryContainerMapping = $PrimContainer | select -ExpandProperty ProtectionContainerMappings | where { $_.SourceFabricFriendlyName -match "East US 2" }
     }
 
     #Set Recovery Container Name & Object & Container Mapping
-    $script:RecoveryContainerName = $PrimaryContainerName.Replace('primary','secondary')
+    $script:RecoveryContainerName = $PrimaryContainerName.Replace('primary', 'secondary')
     $script:RecContainer = Get-AzRecoveryServicesAsrProtectionContainer -fabric $RecoveryFabric -Name $RecoveryContainerName
 
-    if ($RecContainer.FabricFriendlyName -eq 'Central US'){
-        $script:RecoveryContainerMapping = $RecContainer | select -ExpandProperty ProtectionContainerMappings | where {$_.SourceFabricFriendlyName -match "Central US"}
+    if ($RecContainer.FabricFriendlyName -eq 'Central US') {
+        $script:RecoveryContainerMapping = $RecContainer | select -ExpandProperty ProtectionContainerMappings | where { $_.SourceFabricFriendlyName -match "Central US" }
     }
     else {
-        $script:RecoveryContainerMapping = $RecContainer | select -ExpandProperty ProtectionContainerMappings | where {$_.SourceFabricFriendlyName -match "East US 2"}
+        $script:RecoveryContainerMapping = $RecContainer | select -ExpandProperty ProtectionContainerMappings | where { $_.SourceFabricFriendlyName -match "East US 2" }
     }
 
     #Retrieve VMs from ASR Containers
@@ -136,12 +136,12 @@ function ASRRecovery {
     Write-Host " "
 
     #Retrieve All ASR Cache Storage Accounts in Subscription
-    if ($PrimaryContainerMapping.SourceFabricFriendlyName -eq "Central US"){
-        $script:PrimaryStorageAccounts = Get-AzStorageAccount | where {$_.StorageAccountName -match 'uc1toue2'}
+    if ($PrimaryContainerMapping.SourceFabricFriendlyName -eq "Central US") {
+        $script:PrimaryStorageAccounts = Get-AzStorageAccount | where { $_.StorageAccountName -match 'uc1toue2' }
     }
     else {
 
-        $script:PrimaryStorageAccounts = Get-AzStorageAccount | where {$_.StorageAccountName -match 'ue2touc1'}
+        $script:PrimaryStorageAccounts = Get-AzStorageAccount | where { $_.StorageAccountName -match 'ue2touc1' }
     }
 
     $PrimaryStorageAccountCounter = 1
@@ -156,15 +156,15 @@ function ASRRecovery {
     $script:PrimaryCacheStorageAccountName = $PrimaryStorageAccounts[$PrimaryStorageAccountNumber - 1].StorageAccountName
 
     #Set Recovery Cache Storage Account (needed for Failback)
-    if ($PrimaryContainerMapping.SourceFabricFriendlyName -eq "Central US"){
+    if ($PrimaryContainerMapping.SourceFabricFriendlyName -eq "Central US") {
 
-        $script:RecoveryCacheStorageAccountName = $PrimaryCacheStorageAccountName.Replace('uc1toue2','ue2touc1')
-        $script:RecoveryCacheStorageAccount = Get-AzStorageAccount | where {$_.StorageAccountName -eq $RecoveryCacheStorageAccountName}
+        $script:RecoveryCacheStorageAccountName = $PrimaryCacheStorageAccountName.Replace('uc1toue2', 'ue2touc1')
+        $script:RecoveryCacheStorageAccount = Get-AzStorageAccount | where { $_.StorageAccountName -eq $RecoveryCacheStorageAccountName }
     }
     else {
 
-        $script:RecoveryCacheStorageAccountName = $PrimaryCacheStorageAccountName.Replace('ue2touc1','uc1toue2')
-        $script:RecoveryCacheStorageAccount = Get-AzStorageAccount | where {$_.StorageAccountName -eq $RecoveryCacheStorageAccountName}    
+        $script:RecoveryCacheStorageAccountName = $PrimaryCacheStorageAccountName.Replace('ue2touc1', 'uc1toue2')
+        $script:RecoveryCacheStorageAccount = Get-AzStorageAccount | where { $_.StorageAccountName -eq $RecoveryCacheStorageAccountName }    
     }
 
     #Set Resource Groups for Source/Recovery VMs
@@ -216,8 +216,8 @@ function ASRFailback {
             Write-Host " "
             Write-Host -ForegroundColor Red -BackgroundColor Black "ERROR -Unable to get status of Failback Job"
             Write-host -ForegroundColor Red -BackgroundColor Black "ERROR - " $_
-                log "Error" "Unable to get status of Failback Job"
-                log "Error" $_
+            log "Error" "Unable to get status of Failback Job"
+            log "Error" $_
 
             Write-Host " " 
             exit
@@ -239,7 +239,7 @@ function ASRFailback {
         Read-Host -Prompt "Failback has completed successfully. Please check ASR Portal and make sure everything looks OK. Once done, please press ENTER here to continue the Script to Re-Protect failed back VMs"
 
         #Starting to Clean Up all resources created by Failback job.
-        $FBJobReProtect = foreach ($RRPI in $RecoveryRPI){Update-AzRecoveryServicesAsrProtectionDirection -ReplicationProtectedItem $RRPI -AzureToAzure -ProtectionContainerMapping $PrimaryContainerMapping -LogStorageAccountId $PrimaryCacheStorageAccount.Id -RecoveryResourceGroupId $RecoveryResourceGroup.ResourceId}
+        $FBJobReProtect = foreach ($RRPI in $RecoveryRPI) { Update-AzRecoveryServicesAsrProtectionDirection -ReplicationProtectedItem $RRPI -AzureToAzure -ProtectionContainerMapping $PrimaryContainerMapping -LogStorageAccountId $PrimaryCacheStorageAccount.Id -RecoveryResourceGroupId $RecoveryResourceGroup.ResourceId }
 
         Write-Host -ForegroundColor White -BackgroundColor Black "-------------------Monitoring-Cleanup--------------------"
         Write-Host -ForegroundColor White -BackgroundColor Black "----------Status will refresh every 5 seconds------------"
@@ -259,8 +259,8 @@ function ASRFailback {
                 Write-Host " "
                 Write-Host -ForegroundColor Red -BackgroundColor Black "ERROR -Unable to get status of Failback Job"
                 Write-host -ForegroundColor Red -BackgroundColor Black "ERROR - " + $_
-                    log "Error" "Unable to get status of Failback Job"
-                    log "Error" $_
+                log "Error" "Unable to get status of Failback Job"
+                log "Error" $_
 
                 Write-Host " " 
                 exit

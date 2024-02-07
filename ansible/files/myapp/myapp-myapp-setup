@@ -1,0 +1,71 @@
+Architecture:
+
+Dev: myapp Desginer Server (GIT/IDE)
+
+QA: myapp Runtime & myapp Analytics - Runtime runs integration flows. Connects to source and target systems to extract,
+load, and transform
+data.
+
+UAT: myapp Runtime & myapp Analytics
+
+Prod: myapp Runtime & myapp Analytics - use analytics to monitor all Runtime instances, able to schedule, deploy and
+configure the integration flows
+
+
+myapp Runtime Setup:
+1. Copy over runtime.zip file and extract to /opt/myapp_myapp_runtime (ansible - copy job)
+sudo tar -xzvf name_of_the_downloaded_archive.tar.gz -C /opt/myapp_myapp_runtime
+
+2. Set Necessary Permissions (ansible - permissions)
+sudo chmod +x /opt/myapp_myapp_runtime/*.sh
+sudo chmod -R +w /opt/myapp_myapp_runtime/temp
+sudo chmod -R +w /opt/myapp_myapp_runtime/build
+sudo chmod -R +w /opt/myapp_myapp_runtime/sessions
+
+3. Create myapp user and run start engine script (ansible - user creation and run script)
+sudo useradd -r myapp_myapp_user
+sudo chown -R myapp_myapp_user: /opt/myapp_myapp_runtime/
+sudo su - myapp_myapp_user
+cd /opt/myapp_myapp_runtime/
+./startengine.sh - - Place it as a startup script for startengine.sh
+
+Default ports:
+42100
+42101
+42200
+
+#check if port is being used
+lsof -ti :$PORT
+
+#kill port
+kill $(lsof -ti :$PORT)
+kill -9 $(lsof -ti :$PORT)
+sudo kill -9 $(lsof -ti :$PORT)
+
+
+myapp Analytics Setup:
+1. Add new DB and run script to create DB schema for myapp database (Terraform: Add new DB and run myapp-db-schema script
+via TF)
+
+2. myapp User location setup and set environment variables (ansible - create directory and add env variable to setenv.sh)
+
+cd /usr
+mkdir analytics
+export MYAPP_ANALYTICS_WEBAPP_HOME=/usr/analytics/
+
+3. Modify /opt/tomcat/context.xml (ansible, copy modified context.xml from files directory to Linux box)
+
+<Context>
+  ...
+  <Resource name="jdbc/myapp-analytics-datasource-tomcat" auth="Container" type="javax.sql.DataSource"
+    driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    url="jdbc:sqlserver://sql-myapp-vm-dev-uc1.database.windows.net:1433;databaseName=myapp_analytics_repository"
+    username="myapp_db_administrator@sql-myapp-vm-dev-uc1" password="passoword123" maxTotal="100" maxIdle="30"
+    maxWaitMillis="10000" />
+  ...
+</Context>
+
+
+4. Modify /opt/tomcat/tomcat-users.xml (ansible, add this to existing tomcat-users.xml file)
+
+<user name="myapp_admin" password="CheckMeOut123" roles="admin-gui, manager-gui, analyticsAdmin, analyticsConnect" />

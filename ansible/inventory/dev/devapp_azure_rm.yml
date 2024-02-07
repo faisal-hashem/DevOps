@@ -1,11 +1,11 @@
 plugin: azure_rm
 
 include_vm_resource_groups:
-  - '*'
+  - "*"
 
 auth_source: msi
 
-subscription_id: 69bedceb-ae07-433f-8a58-635db0785ff6
+subscription_id: #Enter you subscriptionID
 
 conditional_groups:
   pexip: "'linux' in os_profile.system and 'pex' in name"

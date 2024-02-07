@@ -1,6 +1,6 @@
-DECLARE @dbName NVARCHAR(100) = 'semarchy_repository'
-DECLARE @adminLogin NVARCHAR(100) = 'xdm_db_administrator'
-DECLARE @adminReadOnlyLogin NVARCHAR(100) = 'xdm_db_administrator_ro'
+DECLARE @dbName NVARCHAR(100) = 'myapp_repository'
+DECLARE @adminLogin NVARCHAR(100) = 'myapp_db_administrator'
+DECLARE @adminReadOnlyLogin NVARCHAR(100) = 'myapp_db_administrator_ro'
 DECLARE @adminPassword NVARCHAR(100) = '$(AdminPassword)'
 DECLARE @adminReadOnlyPassword NVARCHAR(100) = '$(AdminReadOnlyPassword)'
 

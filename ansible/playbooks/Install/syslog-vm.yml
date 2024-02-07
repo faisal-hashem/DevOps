@@ -9,14 +9,14 @@
       stat:
         path: /opt/splunk
       register: splunk_is_installed
-  
+
     - name: Copy Splunk
       copy:
         src: ~/ansible/packages/splunk/splunk-9.1.1-heavy-forwarder-linux-2.6-amd64.deb
         dest: /tmp/splunk-9.1.1-heavy-forwarder-linux-2.6-amd64.deb
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       when: not splunk_is_installed.stat.exists
 
     - name: Copy Splunk Certificate
@@ -25,21 +25,21 @@
         dest: /tmp/splunkclouduf.spl
         owner: root
         group: root
-        mode: '0644'
-      when: not splunk_is_installed.stat.exists      
+        mode: "0644"
+      when: not splunk_is_installed.stat.exists
 
     - name: Install Splunk Agent
       apt:
         deb: /tmp/splunk-9.1.1-heavy-forwarder-linux-2.6-amd64.deb
         state: present
-      when: not splunk_is_installed.stat.exists  
+      when: not splunk_is_installed.stat.exists
 
     - name: Allow port 9997 through UFW
       ufw:
         rule: allow
-        port: '9997'
+        port: "9997"
         proto: tcp
-      when: not splunk_is_installed.stat.exists    
+      when: not splunk_is_installed.stat.exists
 
     - name: Install the Splunk Heavy Forwarder
       command:
@@ -54,14 +54,14 @@
           [user_info]
           USERNAME = {{ splunkadmin }}
           PASSWORD = {{ splunkpassword }}
-      when: not splunk_is_installed.stat.exists         
+      when: not splunk_is_installed.stat.exists
 
     - name: Start the Splunk Heacvy forwarder
       command:
         cmd: /opt/splunk/bin/splunk start --accept-license --no-prompt --seed-passwd
-      when: not splunk_is_installed.stat.exists 
+      when: not splunk_is_installed.stat.exists
 
     - name: Restart the Splunk Heavy forwarder
       command:
         cmd: /opt/splunk/bin/splunk restart
-      when: not splunk_is_installed.stat.exists      
+      when: not splunk_is_installed.stat.exists
