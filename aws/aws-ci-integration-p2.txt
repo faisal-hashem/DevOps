@@ -75,19 +75,27 @@ Step 1: Code Commit Setup: CC Repository, IAM User w/Policies, SSH Auth from loc
         - git push origin --all (This will push all the checkout branches to aws code commit, can view it there now.)
         
 
-Step 2: Code Artifact Setup: Create Artifact Repository, Configure Sonar Cloud to connectivity, Parameter Store setup
+Step 2: Code Artifact Setup: Create Artifact Repository, 
+        Configure Sonar Cloud to connectivity, Parameter Store setup
+        
     - Create AWS Code Artifact Repository
         - Connect the AWS Code Artifact to Maven store
         - Create Domain Name for this Account - mandohashdevops
-        - After created, you should see 2 repos under the artifact. We will point to the maven central store repo.
+        - After created, you should see 2 repos under the artifact. 
+        - We will point to the maven central store repo.
     
     - Create Builspec file for Sonar:
-        - Under Maven Repository, Click on View connection instructructions. We will PULL, mvn, Review Step 3-6. We will need to open VS code and go to vprofile-project.
-        - Browse to the ci-aws branch and under aws-files, open sonar_buildspec.yml. We will run these commands through the buildspec file.
+        - Under Maven Repository, Click on View connection instructructions. 
+        - We will PULL, mvn, Review Step 3-6. We will need to open VS code and go to vprofile-project.
+        - Browse to the ci-aws branch and under aws-files, open sonar_buildspec.yml. 
+        - We will run these commands through the buildspec file.
         - Before running, lets review the pom.xml file and the settings.xml file.  
-            - So the buildspec file will export the AWS variable for token. And the settings.xml file will grab it.
-            - The repo details are mentioned in the pom.xml file and authentication info is in the settings.xml (token)
-        - The build spec file is to create the sonar cloud setup. All the details will be saved in the codebuild.
+            - So the buildspec file will export the AWS variable for token. 
+            - And the settings.xml file will grab it.
+            - The repo details are mentioned in the pom.xml file 
+            - and authentication info is in the settings.xml (token)
+        - The build spec file is to create the sonar cloud setup. 
+        - All the details will be saved in the codebuild.
     
     - Retrieve Access Token from Sonar Cloud
         - Login to sonarcloud.io using github. 
@@ -97,13 +105,15 @@ Step 2: Code Artifact Setup: Create Artifact Repository, Configure Sonar Cloud t
         - display name: vprofile-repo
         - Project key - mandohashdevops_vprofile-repo, public profile. 
         - New code for project, we will use previous version. Click create.
-        - Go to the project, repo, expand side bar and click Information. Grab the organization key. mandohashdevops
+        - Go to the project, repo, expand side bar and click Information. 
+        - Grab the organization key. mandohashdevops
     
     - Create Parameter Store for the Sonar Build Spec files variables:
         - Go to the buildspec file. The env variables, parameter-store can be stored in a secret store. 
         - Go to AWS Systems Manager
         - Click on Parameter store on the side bar. 
-        - Lets start grabbing all the parameters from the buildspec file and store the details in the AWS parameter store:
+        - Lets start grabbing all the parameters from the buildspec file 
+        - and store the details in the AWS parameter store:
             - Organization: use organization key from sonar cloud
             - HOST: https://sonarcloud.io
             - Project: use project key from sonar cloud
