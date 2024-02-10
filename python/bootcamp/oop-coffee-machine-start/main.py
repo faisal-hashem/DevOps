@@ -19,4 +19,3 @@ while coffe_machine_on:
         drink_choice = m.find_drink(choice)
         sufficient = coffee.is_resource_sufficient(drink_choice)
         print(sufficient)
-        
