@@ -1,0 +1,37 @@
+kubectl create deployment squadcast --image=ubuntu --replicas=2
+
+kubectl run pod --image=nginx --replicas=2
+
+kubectl get pods --all-namespaces --selector this=label
+
+kubectl get pod MYPOD -o 'jsonpath={.spec.containers[*].name}'
+
+kubectl run test --image=ubuntu:latest --limits="cpu=200m,memory=512Mi" --requests="cpu=200m,memory=512Mi" --privileged=false
+
+kubectl get secrets <secret-name> -o json | jq -r 'data.token' | base64 -d
+
+kubectl -n mynamespace get secret MYSECRET -o ‘go-template={{.data.DB_PASSWORD | base64decode}}’
+
+kubectl create configmap cm123 --from-literal=name=squadcast
+
+kubectl create secret generic my-secret --from-literal=key1=supersecret
+
+kubectl create job squadcast --image=ubuntu -- sleep 200
+
+kubectl expose deployment nginx --type=ClusterIP --port=8080 --target-port=80 --name=nginx-clusterip-svc
+
+kubectl explain pod --recursive
+
+kubectl create deployment squadcast --replicas=3 --image=ubuntu **--dry-run=client -o yaml** > squadcast-deployment.yaml
+
+kubectl set image deploy/nginx nginx=nginx:1.9.1
+
+while [[ $(kubectl get pods hello-d8d8d7455-j9nzw -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
+
+while [[ $(kubectl get pods -l app=hello -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
+
+kubectl port-forward MYPOD 8888:8080
+
+kubectl exec -it <podname> -c <containername> — /bin/bash
+
+kubectl logs mypod-0 -c myapp
