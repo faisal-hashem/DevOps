@@ -1,18 +1,28 @@
 question_data = [
-    {"text": "A slug's blood is green.", "answer": "True"},
-    {"text": "The loudest animal is the African Elephant.", "answer": "False"},
-    {"text": "Approximately one quarter of human bones are in the feet.", "answer": "True"},
-    {"text": "The total surface area of a human lungs is "
-             "the size of a football pitch.", "answer": "True"},
-    {"text": "In West Virginia, USA, if you accidentally hit an animal with your car, "
-             "you are free to take it home to eat.", "answer": "True"},
-    {"text": "In London, UK, if you happen to die in the House of Parliament, "
-             "you are entitled to a state funeral.", "answer": "False"},
-    {"text": "It is illegal to pee in the Ocean in Portugal.", "answer": "True"},
-    {"text": "You can lead a cow down stairs but not up stairs.", "answer": "False"},
-    {"text": "Google was originally called 'Backrub'.", "answer": "True"},
-    {"text": "Buzz Aldrin's mother's maiden name was 'Moon'.", "answer": "True"},
-    {"text": "No piece of square dry paper can be folded in half more than 7 "
-             " times.", "answer": "False"},
-    {"text": "A few ounces of chocolate can to kill a small dog.", "answer": "True"}
-]
+    {"type": "boolean", "difficulty": "easy", "category": "Entertainment: Video Games",
+     "question": "Niko Bellic is the protagonist of Grand Theft Auto IV.", "correct_answer": "True",
+     "incorrect_answers": ["False"]},
+    {"type": "boolean", "difficulty": "easy", "category": "Entertainment: Japanese Anime &amp; Manga",
+     "question": "Gosho Aoyama Made This Series: (Detective Conan \/ Case Closed!)", "correct_answer": "True",
+     "incorrect_answers": ["False"]},
+    {"type": "boolean", "difficulty": "easy", "category": "Geography",
+     "question": "There is an island in Japan called \u014ckunoshima, A.K.A. &quot;Rabbit Island&quot;, so named because of it&#039;s huge population of rabbits.",
+     "correct_answer": "True", "incorrect_answers": ["False"]},
+    {"type": "boolean", "difficulty": "medium", "category": "Geography",
+     "question": "The title of the 1969 film &quot;Krakatoa, East_of Java&quot; is incorrect, as Krakatoa is in fact west of Java.",
+     "correct_answer": "True", "incorrect_answers": ["False"]},
+    {"type": "boolean", "difficulty": "medium", "category": "Entertainment: Film",
+     "question": "There aren&#039;t any live-action clones in &quot;Star Wars: Episode III - Revenge of the Sith&quot;.",
+     "correct_answer": "True", "incorrect_answers": ["False"]},
+    {"type": "boolean", "difficulty": "easy", "category": "Geography",
+     "question": "Hungary is the only country in the world beginning with H.", "correct_answer": "False",
+     "incorrect_answers": ["True"]}, {"type": "boolean", "difficulty": "medium", "category": "History",
+                                      "question": "The first televised presidential debate was between Jimmy Carter and Gerald Ford.",
+                                      "correct_answer": "False", "incorrect_answers": ["True"]},
+    {"type": "boolean", "difficulty": "easy", "category": "General Knowledge",
+     "question": "The Sun rises from the North.", "correct_answer": "False", "incorrect_answers": ["True"]},
+    {"type": "boolean", "difficulty": "easy", "category": "Entertainment: Music",
+     "question": "Scatman John&#039;s real name was John Paul Larkin.", "correct_answer": "True",
+     "incorrect_answers": ["False"]}, {"type": "boolean", "difficulty": "medium", "category": "Art",
+                                       "question": "Venus of Willendorf is one of the earliest works of art, depicting the planets Mars and Venus embrace in the heavens at night.",
+                                       "correct_answer": "False", "incorrect_answers": ["True"]}]

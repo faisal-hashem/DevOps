@@ -10,6 +10,10 @@ kubectl run test --image=ubuntu:latest --limits="cpu=200m,memory=512Mi" --reques
 
 kubectl get secrets <secret-name> -o json | jq -r 'data.token' | base64 -d
 
+kubectl expose pod redis --port=6379 --name redis-service
+
+kubectl run httpd --image=httpd:alpine --port=80 --expose
+
 kubectl -n mynamespace get secret MYSECRET -o ‘go-template={{.data.DB_PASSWORD | base64decode}}’
 
 kubectl create configmap cm123 --from-literal=name=squadcast
