@@ -1,17 +1,20 @@
 from data import question_data
-from question_model import Initialize_Question
+from question_model import QuestionList
 from quiz_brain import QuizBrain
+
 
 question_bank = []
 for i in question_data:
-    question = i["text"]
-    answer = i["answer"]
-    full_line = Initialize_Question(question, answer)
-    question_bank.append(full_line)
-    
+    question = i['question']
+    answer = i['correct_answer']
+    difficulty = i['difficulty']
+    category = i['category']
+    full_question = QuestionList(question, answer, difficulty, category)
+    question_bank.append(full_question)
+
 quiz = QuizBrain(question_bank)
 
-while quiz.check_question():
+while quiz.check():
     quiz.next_question()
-    
+
 quiz.final_score()
