@@ -58,6 +58,19 @@ kubectl delete deployment <deployment_name>
 #See the rollout status of a deployment
 kubectl rollout status deployment <deployment_name>
  
+kubectl rollout history deployment <deployment_name>
+
+#Undo Rollout
+kubectl rollout undo deployment <deployment_name>
+
+kubectl rollout undo deployment <deployment_name> --to-revision=1
+#Check revision of a deployment rollout
+kubectl rollout history deployment <deployment_name> --revision=1
+
+#Update Deployment
+kubectl apply -f deployment.yml
+
+kubectl set image <deployment_name> nginx=nginx:1.9.1
 
 #Events
 #Shortcode = ev
