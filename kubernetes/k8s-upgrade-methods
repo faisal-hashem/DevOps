@@ -1,0 +1,11 @@
+- Re-create: Deletes all existing pods and re-creates new pods
+
+- Rolling Update: Takes down maximum number listed number of pods one at a time and deploys new upgraded pods
+
+- Blue/Green: Deploy new deployment with v2 tag. Update the service yaml to selector tag v2 once confirmeed v2 is working
+
+- Canary: Deploy new deployment with a new tag, once validate its working. Add a new tag across both deployments so service traffic
+          routes to both deployments. And do some math to figure out the percentage of users you want to have the new deployments.
+          Once confirmed, create that certain number of pods in the new deployment(canary) and test.
+          Once confirmed no issues across the board. Update the pod number to include more pods and eventually to 100%.
+          Istio allows you to route by percentage regardless of the number of pods
