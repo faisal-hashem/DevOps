@@ -10,10 +10,15 @@ resource_client = ResourceManagementClient(credential, subscription_id)
 # List Resource groups (name, location, tags)
 rg_group_list = resource_client.resource_groups.list()
 
-resource_client.resource_groups.create_or_update()
-
 print("List of Resource Groups in your Subscription")
 for i in list(rg_group_list):
     print(i.name)
     print(i.location)
     print(f"{i.tags}\n")
+
+
+# # Delete RG
+# rg_name = "fhtestgroup"
+# resource_client.resource_groups.begin_delete(rg_name)
+
+# print(f"RG: {rg_name} has been deleted")
