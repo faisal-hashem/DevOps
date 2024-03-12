@@ -1,0 +1,39 @@
+---
+- name: Rolling update for K8S deployment
+  hosts: client_servers
+  tasks:
+    - name: Set context
+      k8s_auth:
+        kubeconfig: /path/to/kubeconfig
+      register: kube_auth
+
+    - name: Update Kubernetes deployment
+      k8s:
+        state: present
+        definition:
+          kind: Deployment
+          name: your-deployment-name
+          namespace: your-namespace
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: your-container-name
+                    image: your-updated-image:tag
+        kubeconfig: "{{ kube_auth.kubeconfig }}"
+      register: update_result
+
+    - name: Wait for rolling update to complete
+      k8s_info:
+        kubeconfig: "{{ kube_auth.kubeconfig }}"
+        kind: Deployment
+        name: your-deployment-name
+        namespace: your-namespace
+      register: deployment_info
+      until: deployment_info.resources[0].status.updatedReplicas == deployment_info.resources[0].status.replicas
+      retries: 60
+      delay: 10
+
+    - name: Display update result
+      debug:
+        msg: "Rolling update completed successfully"

@@ -1,0 +1,9 @@
+---
+- name: Configure K8S
+  hosts: client_servers
+  become: true
+  tasks:
+  - name: Run Updates
+    apt:
+      upgrade: true
+      update_cache: true

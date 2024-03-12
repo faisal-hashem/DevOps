@@ -1,0 +1,10 @@
+- name: Scale Deployment to Manage High Traffic
+  hosts: client_servers
+  tasks:
+    - name: Scale up the Deployment
+      kubernetes.core.k8s.k8s_scale:
+        api_version: apps/v1
+        kind: Deployment
+        name: e-commerce-backend
+        namespace: my-namespace
+        replicas: 10
