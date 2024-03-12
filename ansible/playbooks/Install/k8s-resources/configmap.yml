@@ -1,0 +1,26 @@
+- name: Manage ConfigMaps and Secrets
+  hosts: client_servers
+  tasks:
+    - name: Create ConfigMap
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: app-configmap
+            namespace: my-namespace
+          data:
+            config.json: |
+              {
+                "key": "value"
+              }
+    - name: Create Secret
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: myapp-secret
+            namespace: my-namespace
+          stringData:
+            password: mypassword

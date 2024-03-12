@@ -1,0 +1,10 @@
+---
+- name: Create K8S Resource
+  hosts: client_servers
+  tasks:
+  - name: K8S namespace
+    kubernetes.core.k8s:
+      name: my-namespace
+      api_version: v1
+      kind: Namespace
+      state: present
