@@ -39,3 +39,7 @@ kubectl port-forward MYPOD 8888:8080
 kubectl exec -it <podname> -c <containername> — /bin/bash
 
 kubectl logs mypod-0 -c myapp
+
+kubectl create ingress <ingress-name> --rule="host/path=service:port"
+
+kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
