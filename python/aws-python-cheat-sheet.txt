@@ -1,0 +1,19 @@
+AWS Regions:
+    def available_regions():
+        client = boto3.client('ec2')
+        regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
+        return regions
+
+EC2 Instances: 
+
+    #Current Default Region Only:
+    ec2 = boto3.resource('ec2')
+    for instance in ec2.instances.all():
+     print(
+         "Name: {0}\n'Platform: {1}\n Type: {2}\nID: {3}\nAMI: {4}\nState: {5}\n".format(
+          instance.tags[0]['Value'], instance.platform, instance.instance_type, instance.id, instance.image.id, instance.state
+         )
+     )
+
+
+    #All regions:
