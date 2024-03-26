@@ -43,3 +43,5 @@ kubectl logs mypod-0 -c myapp
 kubectl create ingress <ingress-name> --rule="host/path=service:port"
 
 kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+
+kubectl create ingress ingress-wear-watch -n app-space --rule="/wear=wear-service:8080" --rule="/watch=video-service:8080"
