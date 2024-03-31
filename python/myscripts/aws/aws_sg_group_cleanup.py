@@ -1,11 +1,8 @@
-# Scan for all exisitng security groups 
-# in all regions with name, description, 
-# last modified date, inbound rules.
-
 import boto3
 import botocore
 from botocore.config import Config
 
+#Return existing security groups in a dictionary in the current region with SG Name and ID
 def list_all_security_groups(region='us-east-2'):
     my_config = Config(region_name = region)
     ec2 = boto3.client("ec2", config=my_config)
@@ -17,9 +14,7 @@ def list_all_security_groups(region='us-east-2'):
         security_dict[group_name] = sg_id
     return security_dict
 
-# Function to scan all EC2 instances attached security groups against list of exisitng security groups
-#If the security groups does not match, delete the security group
-
+# Compare ec2, rds, elb, elbv2, elastic cache, redshift attached security groups against list of exisitng security groups
 def report_not_used_security_groups(region='us-east-2'):
     my_config = Config(region_name=region)
     ec2 = boto3.client("ec2", config=my_config)
@@ -86,6 +81,7 @@ def report_not_used_security_groups(region='us-east-2'):
     used_sg_count = len(instances_sg)
     total_sg_count = unused_sg_count + used_sg_count
     
+    #Return security groups that are not attached, number of total SG, Used SG and Not Used SG. 
     return security_groups, total_sg_count, unused_sg_count, used_sg_count, instances_sg
 
 
@@ -93,6 +89,7 @@ def delete_unused_security_groups(region='us-east-2'):
     unused_security_groups = report_not_used_security_groups(region)[0]
     my_config = Config(region_name=region)
     ec2 = boto3.client('ec2', config=my_config)
+    #Double Check: Checks if any security groups are attached to a instance
     for sg in unused_security_groups:
         network = ec2.describe_network_interfaces(Filters=[{'Name': 'group-id', 'Values': [sg]}])["NetworkInterfaces"]
         if network != []:
@@ -100,42 +97,10 @@ def delete_unused_security_groups(region='us-east-2'):
             print(f"Cannot delete {sg}. Has dependency to Instance: {ec2_dependent}")
         else:
             try:
+                #Deletes Security Group
                 ec2.delete_security_group(GroupId=sg)
             except botocore.exceptions.ClientError as e:
+                #If Error occurs during deletion such as SG dependencies or something.
                 print(f"Could not delete security group {sg}: {e}")
                 
-delete_unused_security_groups(region='us-east-1')
-
-# my_config = Config(region_name='us-east-1')
-# ec2 = boto3.client('ec2', config=my_config)
-# try:
-#     response = ec2.delete_security_group(GroupId='sg-0989599b843190361')
-#     print(response)
-# except botocore.exceptions.ClientError as e:
-#     print("Not allowed")
-    
-
-# sg_report = report_not_used_security_groups('us-east-2')
-
-# print(f"Total Security Groups: {sg_report[1]}")
-# print(f"Used Security Groups: {sg_report[3]}")
-# print(f"Un-Used Security Groups: {sg_report[2]} \n")
-# print(f"Security Groups (Not Used) ({sg_report[2]}) - {sg_report[0]}\n")
-# print(f"Security Groups (Used) ({sg_report[3]}) - {sg_report[4]}\n")
-
-
-
-#print(list_all_security_groups())
-# ec2 = boto3.resource('ec2')
-# ec2_client = boto3.client('ec2')
-
-# sg = ec2.security_groups.all()
-# response = ec2_client.describe_regions()
-# regions = [region['RegionName'] for region in response['Regions']]
-# all_groups = []
-
-# for region in regions:
-#     for group in sg:
-#         all_groups.append(group.group_name)
-
-# print(all_groups)
+print(list_all_security_groups(region='us-east-2'))

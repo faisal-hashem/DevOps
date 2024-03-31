@@ -1,0 +1,15 @@
+---
+- name: Package Management
+  hosts: local
+  tasks:
+    - name: Install packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - tree
+        - curl
+        - htop
+        - wget
+        - alfred
+        - node
