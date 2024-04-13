@@ -8,4 +8,3 @@ kops delete cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-s
 
 aws ec2 create-volume --availability-zone=us-east-2a --size=3 --volume-type=gp2
 - "VolumeId": "vol-0fc1e5a80040465b1",
-
