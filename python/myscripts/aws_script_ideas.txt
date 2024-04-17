@@ -1,7 +1,7 @@
 AWS Scripts:
 
-1. Scan for all exisitng security groups in all regions with name, description, last modified date, inbound rules.
-2. Scan for EC2 Volumes, volume state, size, created date and attached resources, volume state.
+1. DONE - Scan for all exisitng security groups in all regions with name, description, last modified date, inbound rules.
+2. DONE - Scan for EC2 Volumes, volume state, size, created date and attached resources, volume state.
 3. Scan for all existing resources across all regions
 4. Scan for all users in IAM with name, Last Activity, Active Key age, Access Key last used and creation time
 5. Scan for all Roles in IAM with Role name, Last Activity

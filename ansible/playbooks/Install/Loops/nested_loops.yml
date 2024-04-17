@@ -1,0 +1,22 @@
+---
+- name: Deploy applications to environments
+  hosts: local
+  vars:
+    apps_environments:
+      - app: webapp
+        environments:
+          - env: development
+            url: dev.example.com
+          - env: production
+            url: example.com
+      - app: api
+        environments:
+          - env: development
+            url: dev.api.example.com
+          - env: production
+            url: api.example.com
+  tasks:
+    - name: Deploy application to environment
+      debug:
+        msg: "Deploying {{ item.0.app }} to {{ item.1.env }} environment with URL {{ item.1.url }}"
+      loop: "{{ query('subelements', apps_environments, 'environments') }}"
