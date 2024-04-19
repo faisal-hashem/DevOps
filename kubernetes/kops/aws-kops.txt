@@ -1,4 +1,4 @@
-kops create cluster --name=kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --zones=us-east-2a,us-east-2b --node-count=2 --node-size=t3.small --control-plane-size=t3.medium --dns-zone=kubevpro.mandohashdevops.com --node-volume-size=8 --control-plane-volume-size=8
+kops create cluster --name=kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --zones=us-east-2a,us-east-2b --node-count=2 --node-size=t3.small --control-plane-size=t3.medium --dns-zone=kubevpro.mandohashdevops.com --node-volume-size=50 --control-plane-volume-size=50
 
 kops update cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --yes --admin
 
@@ -7,4 +7,4 @@ kops validate cluster --state=s3://vpro-kops-state-231
 kops delete cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --yes
 
 aws ec2 create-volume --availability-zone=us-east-2a --size=3 --volume-type=gp2
-- "VolumeId": "vol-0fc1e5a80040465b1",
+- "VolumeId": "vol-0be2d117af57cab03",
