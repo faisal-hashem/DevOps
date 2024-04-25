@@ -1,10 +1,22 @@
-kops create cluster --name=kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --zones=us-east-2a,us-east-2b --node-count=2 --node-size=t3.small --control-plane-size=t3.medium --dns-zone=kubevpro.mandohashdevops.com --node-volume-size=8 --control-plane-volume-size=8
+DOES NOT WORK... KOPS IS TRASH
+
+kops create cluster --name=kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --zones=us-east-2a,us-east-2b --node-count=2 --node-size=t3.small --control-plane-size=t3.medium --dns-zone=kubevpro.mandohashdevops.com --node-volume-size=50 --control-plane-volume-size=50
 
 kops update cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --yes --admin
 
 kops validate cluster --state=s3://vpro-kops-state-231
 
-kops delete cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --yes
+kubectl label nodes i-041d81c44045e9b54 zone=us-east-2a
+
+kubectl label nodes i-0d9eb20b8bd750828 zone=us-east-2a
+
+kubectl label nodes i-000e1e50f7e9f6fe5 zone=us-east-2b
 
 aws ec2 create-volume --availability-zone=us-east-2a --size=3 --volume-type=gp2
-- "VolumeId": "vol-0fc1e5a80040465b1",
+- "VolumeId": "vol-0ec221306f58f60bb",
+
+kubectl apply -f app-secret.yaml
+
+kubectl apply -f vprodbdep.yaml
+
+kops delete cluster --name kubevpro.mandohashdevops.com --state=s3://vpro-kops-state-231 --yes
