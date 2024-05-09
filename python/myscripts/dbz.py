@@ -1,5 +1,6 @@
 import requests
 
+
 def get_characters(base_url):
     characters = []
     page = 1
@@ -17,6 +18,7 @@ def get_characters(base_url):
             print("HTTP Failed with Error: ", e)
     return characters
 
+
 def get_planets(planet_url):
     planets = []
     page = 1
@@ -33,7 +35,7 @@ def get_planets(planet_url):
         except request.exceptions.RequestException as e:
             print("HTTP Failed with Error: ", e)
     return planets
-            
+
 
 def format_data(data):
     for item in data:
@@ -44,13 +46,15 @@ def format_data(data):
             maxki = item['maxKi']
             print(f"Name: {name}, Race: {race}, Maxki: {maxki}, ki: {ki}")
 
+
 def main():
     base_url = "https://dragonball-api.com/api/characters"
     planet_url = "https://dragonball-api.com/api/planets"
-    data = get_characters(base_url)  
+    data = get_characters(base_url)
     characters = format_data(data)
     planet_data = get_planets(planet_url)
-    print(planet_data)
+    # print(planet_data)
+
 
 if __name__ == "__main__":
     main()
