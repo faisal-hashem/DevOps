@@ -15,7 +15,7 @@ class bcolors:
 
 
 my_machines = [
-    "ENTER_IP_HERE",
+    "10.x.x.x",
 ]
 
 services = [
