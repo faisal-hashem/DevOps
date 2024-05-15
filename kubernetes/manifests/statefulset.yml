@@ -1,7 +1,7 @@
 #StatefulSets are useful when a instance need a specific name or has to come up in a specific order (Service and Replica)
 #StatefulSets by default spin up one by one according to the number of replicas you have.
 #You need to have a service defined and pointed to from the statefulset in order to use it.
-
+#This is a headless service
 apiVersion: v1
 kind: Service
 metadata:
@@ -43,6 +43,14 @@ spec:
         volumeMounts:
         - name: www
           mountPath: /usr/share/nginx/html
+      #DO NOT INCLUDE THIS IN THE StatefulSet, just to show you, the following 2 is needed to assign the headless service to a deployment file.
+      #StatefulSet automatically knows to create unique DNS records for each pod once you spcify the servicename.
+      subdomain: nginx #name of Headless Service, needed to create DNS record with pod name in it
+      hostname: nginx-pod #This will create the DNS record with the pod name in it 
+  #This is the same as creating a PV and PVC and assigning it.
+  #With this, you automate the creation of storage in your stoage class
+  #With each single pod there is a dedicated PVC, PV, and storage in the Storage Class that gets created.
+  #PVCs do not get deleted with Pod corruption or deletion, so next pod that gets spun up in the statefulset will get the storage assigned to it to maintain the state.
   volumeClaimTemplates:
   - metadata:
       name: www
