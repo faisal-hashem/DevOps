@@ -1,0 +1,60 @@
+Accessing Kubernetes master nodes resources, you can do the following:
+    curl https://kube-master:6443/version 
+
+Accessing the Kubernetes Pods through API, do the following:
+    curl https://kube-master:6443/api/v1/pods
+
+You can do the same to access the following:
+    /metrics
+    /healthz
+    /version
+    /api
+    /apis
+    /logs
+
+core api: /api
+    contains namespaces, pods, rc, events, endpoints, nodes, bindings, PV, PVC, configmaps, secrets, services 
+
+named api: /apis (going towards this for the future)
+    contains: /apps - contains deployments, replicasets, statefulsets . /extensions . /networking.k8s.io - contains network policies . /storage.k8s.io . /authentication.k8s.io . /certificates.k8s.io -includes /certificatesigningrequests. etc.
+
+can view them on your k8s cluster by the following:
+    curl https://kube-master:6443 -k
+    curl https://kube-master:6443/apis -k | grep 'name'
+
+if you cannot connect, you can pass in the certificates as the following:
+    curl https://kube-master:6443 -k --key user.key --cert --user.crt --cacert ca.crt 
+
+or you can launch a proxy service by runnign the following, this runs on port 8001. Uses creds from kube config file to access the cluster. 
+    kubectl proxy 
+    curl https://kube-master:8001 -k
+
+Authorizations:
+What can the user do after successfully logging in to the cluster. Give developers, storage/networkers different permissions. Same for service accounts. Assign minimum permissions. Retrict access to users to their namespaces alone. These are set on under /usr/local/bin/kube-apiserver --authorization-mode=AlwaysAllow. You can also set it to multiple modes, goes through each mode in the order it is specified. For example=Node, RBAC, Webhook 
+
+Node
+    By default, users and kubelet (from each node) will be allowed to access the Kube API. The node authorizer gives kubelet Read (services, endpoints, nodes, pods) and write (node status, pod status, events) permissions. Kubelet is a part of the systems nodes group, have a name prefixed with a systems node. So any requests that comes from this gets the granted these permissions by the node authorizer. 
+
+ABAC (Attribute Based Authorization - for external users): Allowing a user/user group to have a set of permissions such as view, create and delete pods. You do this by setting a policy file with a set of policies defined in json in the api server. Difficult to manage. 
+
+RBAC (Role based access controls): Instead of specifying permissions for each user/group, we create roles with a set permissions and assign users/groups to that role. Create a role for developers/security/datateam etc, and assign them to their dedicated roles. 
+
+Webhook: Outsource your authorization with third party tools, example Open Policy Agent. Have k8s make an API call to the Open Policy Agent with User info and access requirements and validate if the user can access or not based on the third party tool. 
+
+AlwaysAllow: Allows all requests without any check. Set to this by default. 
+AlwaysDeny: Always denies. 
+
+
+Setting up RBAC with Roles and RoleBindings:
+    Check role and role binding manifest files.
+    To check your access you can run: 
+    kubectl auth can-i create deployments
+    kubectl auth can-i delete nodes
+
+    Run as another user to validate correct access was given:
+    kubectl auth can-i create deployments -as dev-user
+    kubectl auth can-i create pods -as dev-user
+
+    Can also check namespaces. 
+    kubectl auth can-i create deployments -as dev-user --namespace test
+

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Config 
+
+clusters:
+- name: cluster1
+  cluster:
+    certificate-authority: ca.crt
+    server: https://controlplane:6443
+
+contexts:
+- name: context1
+  context:
+    cluster: cluster1
+    user: user1
+
+users:
+- name: user1
+  user:
+    client-certificate: user.crt
+    client-key: user.key
+
+current-context: context1
+preferences: {}

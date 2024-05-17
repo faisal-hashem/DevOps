@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: Role 
+metadata:
+  name: developer
+rules:
+- apiGroups: [""] #for core groups you leave it blank. for named groups, you will need to specify, such as networking.k8s.io"
+  resources: ["pods"]
+  verbs: ["list", "get", "create", "update", "delete"]
+
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+
+#if you want to restrict the role to a specific pod
+- apiGroups: [""] 
+  resources: ["pods"]
+  verbs: ["list", "get", "create", "update", "delete"]
+  resourceNames: ["podname1", "podname2"]
