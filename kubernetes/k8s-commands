@@ -7,7 +7,11 @@ kubectl version
  
 #Get the configuration of the cluster
 kubectl config view
- 
+kubectl config view --kubeconfig=my-custom-config
+
+#Set current context to use this username and cluster
+kubectl config use-context research --kubeconfig /root/my-kube-config
+
 #List the API resources that are available
 kubectl api-resources
  
