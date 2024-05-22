@@ -23,7 +23,7 @@ can view them on your k8s cluster by the following:
     curl https://kube-master:6443/apis -k | grep 'name'
 
 if you cannot connect, you can pass in the certificates as the following:
-    curl https://kube-master:6443 -k --key user.key --cert --user.crt --cacert ca.crt 
+    curl https://kube-master:6443 -k --key user.key --cert user.crt --cacert ca.crt 
 
 or you can launch a proxy service by runnign the following, this runs on port 8001. Uses creds from kube config file to access the cluster. 
     kubectl proxy 
@@ -58,3 +58,35 @@ Setting up RBAC with Roles and RoleBindings:
     Can also check namespaces. 
     kubectl auth can-i create deployments -as dev-user --namespace test
 
+Normally roles/rolebindings are good for assigning roles to specific namespaces but for cluster roles, you can create one for creating/deleting pods and that role will be applied to ALL namespaces. Which might be usefule in certain situations. 
+
+
+Cluster Resources: Nodes, PV, clusterroles, clusterrolebindings, certificatesigningrequests, namespaces (the object itself is not namespaced)
+
+Check for namespaced resources: kubectl api-resources --namespaced=true
+Check for cluster resources: kubectl api-resources --namespaced=false
+
+
+Cluster Roles: Roles for cluster wide resources. Ex. Cluster Admin role is for viewing/creating/deleting Nodes. Or creating PVs. 
+
+Cluster Role Bindings: Bind to the Cluster role. 
+
+Kubectl --> Authentication --> Authorization --> Admission Controllers --> Create Pod
+
+Admission Controllers: Define policies for k8s resource creations. For example, permitting images from certain registries, do not permit runAs root user, permitting certain capabilities, ensuring pods always have labels. 
+
+Pre-built Admission Controllers: AlwaysPullImages, DefaultStorageClass, EventRateLimit, NamespaceExists etc. 
+
+Check for Enabled Admission Controllers:
+    kube-apiserver -h | grep enable-admission-plugins
+OR  kubectl exec kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep enable-admission-plugins
+OR ps -ef | grep kube-apiserver | grep admission-plugins
+
+Check for not-usually enabled controllers: 
+
+kubectl exec kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep enable-admission-plugins 
+
+Add Admission Controllers:
+    vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
+To disable Admission controller plugins, you can add the following flag: --disable-admission-plugins=DefaultStorageClass 
