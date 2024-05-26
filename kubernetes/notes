@@ -90,3 +90,57 @@ Add Admission Controllers:
     vi /etc/kubernetes/manifests/kube-apiserver.yaml
 
 To disable Admission controller plugins, you can add the following flag: --disable-admission-plugins=DefaultStorageClass 
+
+Mutating Admission Controllers: Can change or mutate the object itself using the admission controller. Example: DefaultStorageClass - if a storageClassName is not specified on a PVC claim then the default storage class will get added to the PVC. It MuTaTeS. 
+
+What we worked on first is the Validating admission controller. 
+
+Mutating admission controller runs first and then the validating admission controller runs after. This is to avoid any conflicts with the validation process. 
+
+Create your own Mutating Admission Controller with Webhook Server:
+
+This will authorize admission controller to send admission review requests to the webhook server and the webhook server will then respond with a response if it is allowed or not. 
+
+- Create your own Admission Webhook Server (can be external or in the k8s cluster)
+    - This can be written in GO/Python or other programming language that can accept the mutating/validating admission controller api and respond with a JSON object that the webserver expects. 
+    - If hosted in the k8s cluster, you can deploy it through a deployment manifest and associate it with a service that can be accessed. 
+
+- Configure the k8s manifest for webhook to talk to the Webhook Server
+    - Create a ValidatingWebhookConfiguration OR MutatingWebhookConfiguration manifest. (see manifest folder)
+
+
+API:
+
+API Versions: 
+
+v1alpha: Very new and contains bugs in it. Might be dropped later, so risky to use. 
+
+v1beta: Has commitment to go to GA but may contain minor bugs. 
+
+v1: Highly reliable and can be used. 
+
+- In order to enable using the different API groups, you need to add it to the runtime-config=api/all or api/v2alpha1 etc.. settings in the kube-apiserver -h | grep runtime-config 
+
+API Deprecation Policy: Mandates what version can be used and cant be used. This is on the API side, when they remove a feature they will deprecate it by updating the version. 
+
+For example in v1alpha1 they have a feature that wasn't working. Now in v1alpha2, it has been removed. But all of our yaml manifests are pointing to v1alpha1. Now we can CHANGE our preferred/storage version to v1alpha2 and that would automatically convert all of our yaml manifests to v1alpha2. 
+
+API Deprecation Policy 2: API objects must be able to round-trip between API versions in a given release without information loss, with the exception of whole REST resources that do not exist in some verisons. This ensures when going from v1alpha1 to v1alpha2, and back to v1alpha1, the v1alpha1 version will now contain the updated objects of v1alpha2.
+
+API Deprecation Policy 4a: Other than the most recent API versions in each track, older API versions must be supported after their announced deprecation for a duration of no less than: GA(12 months or 3 releases), Beta(9 months or 3 releases), and Alpha(0 releases).
+
+ API Deprecation Policy 4b: The preferred API version and the storage version for a given group may NOT advance until after a release has been made that supoorts both the new version and the previous version. Once the previous version is supported, then you can switch the preferred/storage version. 
+
+ Once the GA version releases, the v1beta1 and v1beta2 gets deprecated after 3 releases or 9 months (whatever comes first). 
+
+ API Deprecation Policy 3: An API version in a given track may NOT be deprecated until a new API version at least as a stable is released. Which means a v1alpha1 version cannot deprecate a v1 version but it can only be done the other way around. For example v2 can deprecate v1. 
+
+ In order to convert a yaml file to a different version, you can use: 
+    - kubectl convert -f nginx.yaml --output-version apps/v1
+    - kubectl-convert -f ingress-old.yaml --output-version networking.k8s.io/v1 | kubectl apply -f -
+
+
+kubectl api-resources - shows all the resources with their API versions and short names and if it goes into a namespace
+
+To change the default version for rbac.authorization.k8s.io for example. You can go to: /etc/kubernetes/manifests/kube-apiserver.yaml and add --runtime-config=rbac.authorization.k8s.io/v1alpha1. 
+    - make sure to take backup of this file before making any changes as this can break your cluster. 
