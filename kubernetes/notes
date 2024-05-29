@@ -148,3 +148,22 @@ kubectl api-resources - shows all the resources with their API versions and shor
 
 To change the default version for rbac.authorization.k8s.io for example. You can go to: /etc/kubernetes/manifests/kube-apiserver.yaml and add --runtime-config=rbac.authorization.k8s.io/v1alpha1. 
     - make sure to take backup of this file before making any changes as this can break your cluster. 
+
+
+Custom Resource Definition: Create your own custom resource, this is just the definition file. The definitions are stored in ETCD and when you run kubectl get pod, you are grabbing it from ETCD. 
+
+The controller is responsible for creating the actual resource definition through the worker nodes. Kubernetes is based off of GO language, so the actual code to create these resource definitions is through the GO language. Therefore, to create your own custom controller, you will need to write it out in GO language. This is continuously running and monitoring the kubernetes cluster. 
+
+ETCD communicates with the Controller when you run commands suchs as kubectl run nginx -i=nginx:1.1 and is able to create the resources needed. 
+
+See customresourcedef.yaml for a custom resource definition file example. Pretty much Pods, deployments, etc all has a version of this resource definition file. 
+
+Build custom controller (using GO) (NOT on exam):
+- Make sure to install GO
+- git clone https://github.com/kubernetes/sample-controller.git
+- cd sample-controller
+- go build -o sample-controller .
+- ./sample-controller -kubeconfig=$HOME/.kube/config
+- Distribute it in the cluster, package it in a docker image, and run this as a pod in the cluster. 
+
+Operator Framework (NOT on exam): Avoid deploying CRD and Controller separately. Can package them together and deploy as a single entity. 
