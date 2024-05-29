@@ -133,6 +133,10 @@ API Deprecation Policy 4a: Other than the most recent API versions in each track
 
  Once the GA version releases, the v1beta1 and v1beta2 gets deprecated after 3 releases or 9 months (whatever comes first). 
 
+Check for the preferred version on the API server: 
+kubectl proxy 8001&
+curl localhost:8001/apis/authorization.k8s.io
+
  API Deprecation Policy 3: An API version in a given track may NOT be deprecated until a new API version at least as a stable is released. Which means a v1alpha1 version cannot deprecate a v1 version but it can only be done the other way around. For example v2 can deprecate v1. 
 
  In order to convert a yaml file to a different version, you can use: 
