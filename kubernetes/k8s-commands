@@ -325,3 +325,5 @@ kubectl get pods -n=[namespace_name]
 -f Filename, directory, or URL to files to use to create a resource. For example when creating a pod using data in a file named newpod.json.
 
 kubectl create -f ./newpod.json
+
+k run httpd --image=httpd:alpine --port=80 --expose=true
