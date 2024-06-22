@@ -2,13 +2,18 @@ provider "azurerm" {
   features {}
 }
 
+resource "azurerm_resource_group" "azrg" {
+  name     = "az-rg"
+  location = "centralus"
+}
+
 module "aks" {
   source = "github.com/flavius-dinu/terraform-az-aks.git?ref=v1.0.12"
   kube_params = {
     kube1 = {
       name                = "kube1"
-      rg_name             = "rg1"
-      rg_location         = "westeurope"
+      rg_name             = resource.azurerm_resource_group.azrg
+      rg_location         = "centralus"
       dns_prefix          = "kube"
       identity            = [{}]
       enable_auto_scaling = false
