@@ -12,7 +12,7 @@ module "aks" {
   kube_params = {
     kube1 = {
       name                = "kube1"
-      rg_name             = resource.azurerm_resource_group.azrg
+      rg_name             = azurerm_resource_group.azrg.name
       rg_location         = "centralus"
       dns_prefix          = "kube"
       identity            = [{}]
