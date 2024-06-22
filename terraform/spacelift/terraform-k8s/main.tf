@@ -9,64 +9,63 @@ resource "kubernetes_namespace" "terraform-k8s" {
   }
 }
 
-#Kubernetes deployment 
-resource "kubernetes_deployment" "nginx" {
+resource "kubernetes_deployment" "test-deploy" {
   metadata {
-    name      = "nginx"
-    namespace = kubernetes_namespace.terraform-k8s.metadata[0].name
+    name = "terraform"
+    namespace = "terraform-k8s"
+    labels = {
+      test = "MyApp"
+    }
   }
 
   spec {
-    replicas = 1
+    replicas = 3
 
     selector {
       match_labels = {
-        app = "nginx"
+        test = "MyApp"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "nginx"
+          test = "MyApp"
         }
       }
 
       spec {
         container {
-          name  = "nginx"
           image = "nginx:1.21.6"
+          name  = "nginx-terraform"
 
-          port {
-            container_port = 80
+          resources {
+            limits = {
+              cpu    = "0.5"
+              memory = "512Mi"
+            }
+            requests = {
+              cpu    = "250m"
+              memory = "50Mi"
+            }
+          }
+
+          liveness_probe {
+            http_get {
+              path = "/"
+              port = 80
+
+              http_header {
+                name  = "X-Custom-Header"
+                value = "Awesome"
+              }
+            }
+
+            initial_delay_seconds = 3
+            period_seconds        = 3
           }
         }
       }
     }
   }
-}
-
-#Kubernetes service to access nginx webpage
-resource "kubernetes_service" "nginx" {
-  metadata {
-    name      = "nginx"
-    namespace = kubernetes_namespace.terraform-k8s.metadata[0].name
-  }
-
-  spec {
-    selector = {
-      app = kubernetes_deployment.nginx.spec[0].template[0].metadata[0].labels.app
-    }
-
-    port {
-      port        = 80
-      target_port = 80
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-output "nginx_load_balancer_ip" {
-  value = kubernetes_service.nginx.status[0].load_balancer[0].ingress[0].ip
 }
