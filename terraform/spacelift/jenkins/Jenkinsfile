@@ -1,0 +1,35 @@
+pipeline{
+     agent any
+    
+     stages{
+        stage('Git Checkout'){
+            steps{
+                git branch: 'main', url: 'https://github.com/faisal-hashem/DevOps'
+            }
+        }
+        
+        stage('Terraform init'){
+            steps{
+                dir("terraform/spacelift/terraform-k8s"){
+                     sh 'terraform init'
+                }
+            }
+        }
+        
+        stage('Terraform plan'){
+            steps{
+                dir("terraform/spacelift/terraform-k8s"){
+                     sh 'terraform plan'
+                }
+            }
+        }
+        
+        stage('Terraform apply'){
+            steps{
+                dir("terraform/spacelift/terraform-k8s"){
+                     sh 'terraform apply --auto-approve'
+                }
+            }
+        }
+    }
+}
